@@ -6,47 +6,47 @@ import { User, UserDocument } from './user.model';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-    async createUser(createUserDto: CreateUserDto): Promise<User> {
-        const createdUser = new this.userModel(createUserDto);
-        return createdUser.save();
-    }
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const createdUser = new this.userModel(createUserDto);
+    return createdUser.save();
+  }
 
-    async findAll(): Promise<User[]> {
-        return this.userModel.find().exec()
-    }
+  async findAll(): Promise<User[]> {
+    return this.userModel.find().exec();
+  }
 
-    async removeUserById(id: string): Promise<User> {
-        return this.userModel.findByIdAndRemove(id)
-    }
+  async removeUserById(id: string): Promise<User> {
+    return this.userModel.findByIdAndRemove(id);
+  }
 
-    async removeAllUsers(): Promise<User[]> {
-        const users = await this.userModel.find()
-        users.forEach(user => {
-            this.userModel.findByIdAndRemove(user._id).exec()
-        })
-        return users;
-    }
+  async removeAllUsers(): Promise<User[]> {
+    const users = await this.userModel.find();
+    users.forEach((user) => {
+      this.userModel.findByIdAndRemove(user._id).exec();
+    });
+    return users;
+  }
 
-    async findUserById(id: string): Promise<User[]> {
-        return this.userModel.findById(id)
-    }
+  async findUserById(id: string): Promise<User> {
+    return this.userModel.findById(id).exec();
+  }
 
-    async findUserByName(nickname: string): Promise<User> {
-        return this.userModel.findOne({nickname: nickname});
-    }
+  async findUserByName(nickname: string): Promise<User> {
+    return this.userModel.findOne({ nickname: nickname });
+  }
 
-    async findUserByEmail(email: string): Promise<User> {
-        return this.userModel.findOne({email: email})
-    }
+  async findUserByEmail(email: string): Promise<User> {
+    return this.userModel.findOne({ email: email });
+  }
 
-    async findUserByNumber(number: string): Promise<User> {
-        return this.userModel.findOne({number: number})
-    }
+  async findUserByNumber(number: string): Promise<User> {
+    return this.userModel.findOne({ number: number });
+  }
 
-    async updateUserById(id: string, updateData: object): Promise<User> {
-        const user = this.userModel.findById(id).exec()
-        return this.userModel.findByIdAndUpdate(id, {...user, ...updateData})
-    }
+  async updateUserById(id: string, updateData: object): Promise<User> {
+    const user = this.userModel.findById(id).exec();
+    return this.userModel.findByIdAndUpdate(id, { ...user, ...updateData });
+  }
 }
