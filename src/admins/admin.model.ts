@@ -9,7 +9,7 @@ export class Admin{
 
     _id?: string;
 
-    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Owner'})
+    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
     userId: User;
 
     @Prop({required: true, unique: true})

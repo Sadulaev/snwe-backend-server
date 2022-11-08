@@ -25,13 +25,25 @@ export class AuthService {
 
     async userLogin(loginUserDto: LoginUserDto) {
         const user = await this.validateUser(loginUserDto)
-        return this.generateToken(user)
+        return this.generateUserToken(user)
     }
 
-    private async generateToken(user: User | Admin) {
+    async adminLogin(loginUserDto: LoginUserDto) {
+        const user = await this.validateUser(loginUserDto)
+    }
+    
+
+    private async generateUserToken(user: User) {
         const payload = { id: user._id, nickname: user.nickname }
         return {
             token: this.jwtService.sign(payload, {secret: process.env.JWT_SECRET_KEY})
+        }
+    }
+
+    private async generateAdminToken(admin: Admin) {
+        const payload = {id: admin._id, nickname: admin.nickname, lvl: admin.accessLvl}
+        return {
+            token: this.jwtService.sign(payload,)
         }
     }
 
