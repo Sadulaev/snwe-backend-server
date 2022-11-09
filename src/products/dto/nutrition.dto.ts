@@ -1,4 +1,4 @@
-import { IsDefined, Length, IsNotEmpty, IsNumber } from 'class-validator'
+import { IsDefined, Length, IsNotEmpty, IsNumber, IsArray } from 'class-validator'
 
 
 export class CreateNutritionDto {
@@ -11,7 +11,7 @@ export class CreateNutritionDto {
     title: string;
 
     @IsDefined({ message: 'Поле не может быть пустым' })
-    @Length(1, 100, {message: 'Должна быть хотя бы одна строка информации'})
+    @IsNotEmpty({message: 'Значение не может быть пустым'})
     info: string;
 
     @IsDefined({ message: 'Поле не может быть пустым' })
@@ -22,6 +22,7 @@ export class CreateNutritionDto {
     @IsDefined({ message: 'Поле не может быть пустым' })
     category: string;
 
+    @IsArray({message: "Неверный формат данных"})
     warnings: string[];
 }
 
@@ -32,7 +33,7 @@ export class EditNutritionDto {
     @Length(3, 30, {message: 'Название смести должно быть длиной от 3-х до 30 символ'})
     title?: string;
 
-    @Length(1, 100, {message: 'Должна быть хотя бы одна строка информации'})
+    @IsNotEmpty({message: 'Значение не может быть пустым'})
     info?: string;
 
     @IsNotEmpty({message: 'Значение не может быть пустым'})
@@ -42,5 +43,6 @@ export class EditNutritionDto {
     @IsNotEmpty({message: 'Значение не может быть пустым'})
     category: string;
 
+    @IsArray({message: "Неверный формат данных"})
     warnings?: string[]
 }

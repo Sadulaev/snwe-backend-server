@@ -1,50 +1,51 @@
-import { IsDefined, Length, IsNotEmpty, IsNumber } from 'class-validator'
+import { IsDefined, Length, IsNotEmpty, IsNumber, ArrayMinSize, IsArray } from 'class-validator'
 
 
 export class CreateMixtureDto {
     @IsDefined({ message: 'Поле не может быть пустым' })
     @IsNotEmpty({message: 'Значение не может быть пустым'})
-    image: string;
+    readonly image: string;
 
     @IsDefined({ message: 'Поле не может быть пустым' })
     @Length(3, 30, {message: 'Название смести должно быть длиной от 3-х до 30 символ'})
-    title: string;
+    readonly title: string;
 
     @IsDefined({ message: 'Поле не может быть пустым' })
-    @Length(1, 100, {message: 'Должна быть хотя бы одна строка информации'})
-    info: string[];
+    @ArrayMinSize(1, {message: 'Должна быть хотя бы одна строка информации'})
+    readonly info: string[];
 
     @IsDefined({ message: 'Поле не может быть пустым' })
     @IsNotEmpty({message: 'Значение не может быть пустым'})
     @IsNumber({allowNaN: false, allowInfinity: false} , {message: 'Некорректное значение цены. Введите целочисленное значение'})
-    twoWeekPrice: number;
+    readonly twoWeekPrice: number;
 
     @IsDefined({ message: 'Поле не может быть пустым' })
     @IsNotEmpty({message: 'Значение не может быть пустым'})
     @IsNumber({allowNaN: false, allowInfinity: false}, {message: 'Некорректное значение цены. Введите целочисленное значение'})
-    twoMonthPrice: number;
+    readonly twoMonthPrice: number;
 
-    warnings: string[];
+    @IsArray({message: "Неверный формат данных"})
+    readonly warnings: string[];
 }
 
 export class EditMixtureDto {
-    @IsDefined({ message: 'Поле не может быть пустым' })
     @IsNotEmpty({message: 'Значение не может быть пустым'})
-    image?: string;
+    readonly image?: string;
 
     @Length(3, 30, {message: 'Название смести должно быть длиной от 3-х до 30 символ'})
-    title?: string;
+    readonly title?: string;
 
-    @Length(1, 100, {message: 'Должна быть хотя бы одна строка информации'})
-    info?: string[];
+    @ArrayMinSize(1, {message: 'Должна быть хотя бы одна строка информации'})
+    readonly info?: string[];
 
     @IsNotEmpty({message: 'Значение не может быть пустым'})
     @IsNumber({allowNaN: false, allowInfinity: false} , {message: 'Некорректное значение цены. Введите целочисленное значение'})
-    twoWeekPrice?: number;
+    readonly twoWeekPrice?: number;
 
     @IsNotEmpty({message: 'Значение не может быть пустым'})
     @IsNumber({allowNaN: false, allowInfinity: false}, {message: 'Некорректное значение цены. Введите целочисленное значение'})
-    twoMonthPrice?: number;
+    readonly twoMonthPrice?: number;
 
-    warnings?: string[]
+    @IsArray({message: "Неверный формат данных"})
+    readonly warnings: string[];
 }

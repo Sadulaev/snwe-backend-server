@@ -23,7 +23,7 @@ export class Nutrition {
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Category'})
     category: Category;
 
-    @Prop()
+    @Prop({default: []})
     warnings: string[];
 }
 
