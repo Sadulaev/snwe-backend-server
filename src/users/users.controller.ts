@@ -10,7 +10,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.model';
 import { UsersService } from './users.service';
-import { ValidationPipe } from 'src/pipes/validation.pipe';
+import { ValidationPipe } from '../pipes/validation.pipe';
 import { EditUserDto } from './dto/edit-user.dto';
 
 @Controller('users')
@@ -25,13 +25,8 @@ export class UsersController {
   }
 
   @Delete('/remove/:id')
-  async removeUserById(@Param('id') id: string): Promise<User> {
+  async removeUserById(@Param('id') id: string) {
     return this.usersService.removeUserById(id);
-  }
-
-  @Delete('/removeAll')
-  async removeAllUsers(): Promise<User[]> {
-    return this.usersService.removeAllUsers();
   }
 
   @Get('/getAll')
@@ -63,7 +58,7 @@ export class UsersController {
   async updateUser(
     @Param('id') id: string,
     @Body(new ValidationPipe()) editUserDto: EditUserDto,
-  ): Promise<User> {
+  ) {
     return this.usersService.updateUserById(id, editUserDto);
   }
 }

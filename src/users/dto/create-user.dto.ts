@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   IsDefined,
 } from 'class-validator';
-import { PasswordValidation } from 'src/validation/PasswordValidation';
+import { PasswordValidation } from '../../validation/PasswordValidation';
 
 export class CreateUserDto {
   @IsDefined({message: "Поле не может быть пустым"})

@@ -31,8 +31,12 @@ export class ProductsService {
                 throw new HttpException('Название категории не может повторяться', HttpStatus.BAD_REQUEST)
             }
         }
-        await this.categoryModel.findByIdAndUpdate(id, { ...updatedData }).exec()
-        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        const result = await this.categoryModel.findByIdAndUpdate(id, { ...updatedData }).exec()
+        if (result) {
+            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        } else {
+            throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND)
+        }
     }
 
     async getCategoryById(id: string): Promise<Category> {
@@ -65,8 +69,12 @@ export class ProductsService {
                 throw new HttpException('Название смеси не может повторяться', HttpStatus.BAD_REQUEST)
             }
         }
-        await this.mixtureModel.findByIdAndUpdate(id, updatedData).exec()
-        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        const result = await this.mixtureModel.findByIdAndUpdate(id, { ...updatedData }).exec()
+        if (result) {
+            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        } else {
+            throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND)
+        }
     }
 
     async getMixtureById(id: string): Promise<Mixture> {
@@ -80,6 +88,14 @@ export class ProductsService {
 
     async getAllMixtures(): Promise<Mixture[]> {
         return await this.mixtureModel.find().exec()
+    }
+
+    async searchMixtures(skip: string, counter:string) {
+        const count =  (await this.mixtureModel.find().exec()).length
+        const result = await this.mixtureModel.find().skip(+skip || 0).limit(+counter)
+        const currentCount = (+counter) + (+skip || 0)
+        console.log(skip, counter)
+        return {data: result, isMore: count > currentCount}
     }
 
     async createNutrition(createNutritionDto: CreateNutritionDto): Promise<Nutrition> {
@@ -99,8 +115,12 @@ export class ProductsService {
                 throw new HttpException('Название питания не может повторяться', HttpStatus.BAD_REQUEST)
             }
         }
-        await this.nutritionModel.findByIdAndUpdate(id, { ...updatedData }).exec()
-        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        const result = await this.nutritionModel.findByIdAndUpdate(id, { ...updatedData }).exec()
+        if (result) {
+            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+        } else {
+            throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND)
+        }
     }
 
     async getNutritionById(id: string) {
@@ -114,5 +134,18 @@ export class ProductsService {
 
     async getAllNutritions(): Promise<Nutrition[]> {
         return await this.nutritionModel.find().exec()
+    }
+
+    async searchNutritions(name: string | null, category: string | null, from: string, to: string, skip: string, counter: string) {
+        const search = {};
+        name ? search['title'] = new RegExp('^' + name, 'i') : ''
+        category ? search['category'] = category : ''
+        from || to ? search['price'] = {$gt: +from-1 || 0, $lt: +to+1 || 100000} : ''
+
+        // console.log(search, skip, counter)
+        const count = (await this.nutritionModel.find(search).exec()).length
+        const result = await this.nutritionModel.find(search).skip(+skip).limit(+counter).exec()
+        const currentCount = (+counter) + (+skip || 0)
+        return {data: result, isMore: (count > currentCount)}
     }
 }

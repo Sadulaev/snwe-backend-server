@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   ValidateIf,
 } from 'class-validator';
-import { PasswordValidation } from 'src/validation/PasswordValidation';
+import { PasswordValidation } from '../../validation/PasswordValidation';
 
 export class EditUserDto {
   // @ValidateIf(obj => obj.nickaname !== undefined)

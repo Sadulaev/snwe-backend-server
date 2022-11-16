@@ -15,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose'
       { name: 'Nutrition', schema: NutritionSchema },
       { name: 'Mixture', schema: MixtureSchema }
    ]),
-  ]
+  ],
+  exports: [ProductsService]
 })
 export class ProductsModule {}

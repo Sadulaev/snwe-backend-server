@@ -14,13 +14,8 @@ export class AuthService {
     constructor(private usersService: UsersService, private jwtService: JwtService) { }
 
     async userRegist(userDto: CreateUserDto) {
-        const newUser = await this.checkDuplicate(userDto)
         const hashPassword = await bcrypt.hash(userDto.password, +(process.env.BCRYPT_HASH))
-        const createdUser = this.usersService.createUser({ ...newUser, password: hashPassword })
-        if (createdUser) {
-            throw new HttpException('Регистрация прошла успешно', HttpStatus.CREATED)
-        }
-        throw new HttpException('Ошибка регистрации', HttpStatus.BAD_REQUEST)
+        return await this.usersService.createUser({ ...userDto, password: hashPassword })
     }
 
     async userLogin(loginUserDto: LoginUserDto) {
@@ -34,7 +29,7 @@ export class AuthService {
     
 
     private async generateUserToken(user: User) {
-        const payload = { id: user._id, nickname: user.nickname }
+        const payload = { id: user._id, nickname: user.nickname, number: user.number }
         return {
             token: this.jwtService.sign(payload, {secret: process.env.JWT_SECRET_KEY})
         }
@@ -51,34 +46,19 @@ export class AuthService {
         const email = await this.usersService.findUserByEmail(loginUserDto.login);
         const nickname = await this.usersService.findUserByName(loginUserDto.login);
         const user = email || nickname;
-
         if (user) {
-            const checkPassword = bcrypt.compare(loginUserDto.password, user.password)
+            const checkPassword = await bcrypt.compare(loginUserDto.password, user.password)
 
             if (checkPassword) {
                 return user
             }
-            throw new HttpException('Некорректный логин или пароль', HttpStatus.BAD_REQUEST)
+            throw new HttpException('Неверный логин или пароль', HttpStatus.BAD_REQUEST)
         }
     }
 
-    private async checkDuplicate(userDto: CreateUserDto) {
-        let errors = {
-            email: '', nickname: '', number: ''
-        }
-        const email = await this.usersService.findUserByEmail(userDto.email)
-        const nickname = await this.usersService.findUserByName(userDto.nickname)
-        const number = await this.usersService.findUserByNumber(userDto.number)
-
-        email ? errors.email = 'Пользователь с такими адресом почтового ящика уже зарегистрирован' : false
-        nickname ? errors.nickname = 'Данный логин используется другим пользователем' : false
-        number ? errors.number = 'Пользователь с таким номером уже зарегистрирован' : false
-
-        if(email || nickname || number) {
-            throw new DuplicationException(errors)
-        }
-        return userDto;
-    }
+    // private async validateAdmin(loginUserDto: LoginUserDto) {
+    //     const nickname = await this.
+    // }
 
 }
  

@@ -1,5 +1,5 @@
-import { Controller, Post, Put, Get, Param, Body } from '@nestjs/common';
-import { ValidationPipe } from 'src/pipes/validation.pipe';
+import { Controller, Post, Put, Get, Param, Body, Query } from '@nestjs/common';
+import { ValidationPipe } from '../pipes/validation.pipe';
 import { CreateCategoryDto, EditCategoryDto } from './dto/category.dto';
 import { CreateMixtureDto, EditMixtureDto } from './dto/mixture.dto';
 import { CreateNutritionDto, EditNutritionDto } from './dto/nutrition.dto';
@@ -49,7 +49,12 @@ export class ProductsController {
         return this.productsService.getAllNutritions()
     }
 
-    @Post('/nutrition/create')
+    @Get('/nutritions/getByQuery')
+    async getNutritionsByQuery(@Query('title') title: string, @Query('category') category: string, @Query('from') from: string, @Query('to') to: string,@Query('skip') skip: string, @Query('counter') counter: string,) {
+        return this.productsService.searchNutritions(title, category, from, to, skip, counter)
+    }
+
+    @Post('/mixture/create')
     async createMixture(@Body(new ValidationPipe()) createMixtureDto: CreateMixtureDto) {
         return this.productsService.createMixture(createMixtureDto)
     }
@@ -67,5 +72,11 @@ export class ProductsController {
     @Get('/mixture/getAll')
     async getAllMixtures() {
         return this.productsService.getAllMixtures()
+    }
+
+    @Get('/mixtures/getByQuery')
+    async getMixturesByQuery(@Query('skip') skip: string, @Query('counter') counter: string) {
+        console.log(skip, counter)
+        return this.productsService.searchMixtures(skip, counter)
     }
 }
