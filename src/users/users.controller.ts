@@ -6,12 +6,15 @@ import {
   Put,
   Body,
   Param,
+  UseGuards
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.model';
 import { UsersService } from './users.service';
 import { ValidationPipe } from '../pipes/validation.pipe';
 import { EditUserDto } from './dto/edit-user.dto';
+import { Access } from 'src/auth/access.decorator';
+import { AccessGuard } from 'src/auth/access.guard';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +31,8 @@ export class UsersController {
   async removeUserById(@Param('id') id: string) {
     return this.usersService.removeUserById(id);
   }
-
+  @Access([0])
+  @UseGuards(AccessGuard)
   @Get('/getAll')
   async findAllUsers(): Promise<User[]> {
     return this.usersService.findAll();

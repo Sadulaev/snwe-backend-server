@@ -1,4 +1,3 @@
-
 export class CreateAdminDto {
     constructor(userId, nickname, password) {
         this.userId = userId;

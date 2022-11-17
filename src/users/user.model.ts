@@ -19,17 +19,14 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: [] })
-  shopHistry: string[];
+  // @Prop({ default: [] })
+  // shopHistry: string[];
 
   @Prop({ default: [] })
   favorite: string[];
 
   @Prop({ default: false })
   banned: boolean;
-
-  // @Prop({ default: 'USER' })
-  // role: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -37,6 +37,9 @@ export class AdminsService {
             throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND)
         }
     }
+    async getAdminByName(nickname: string): Promise<Admin> {
+        return await this.adminModel.findOne({nickname: nickname}).exec()
+    }
     async getAllAdmins(): Promise<Admin[]> {
         return this.adminModel.find().exec()
     }

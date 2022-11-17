@@ -13,6 +13,6 @@ export class PasswordValidation implements ValidatorConstraintInterface {
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {
-    return 'Пароль должен быть от 6 сиволов и включать в себя заглавные и строчные латинские буквы,хотя бы одну цифру и спецсимвол(!@#$%^&*)';
+    return 'Пароль должен быть от 6 символов и включать в себя заглавные и строчные латинские буквы,хотя бы одну цифру и спецсимвол(!@#$%^&*)';
   }
 }

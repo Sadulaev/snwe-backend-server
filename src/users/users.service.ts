@@ -53,15 +53,8 @@ export class UsersService {
   }
 
   async findUserByName(nickname: string): Promise<User> {
-    const result = await this.userModel.findOne({ nickname: nickname }).exec();
-    console.log(result)
-    if (result) {
-      return result;
-    } else {
-      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND)
-    }
+    return await this.userModel.findOne({ nickname: nickname }).exec();
   }
-
   async findUserByEmail(email: string): Promise<User> {
     return await this.userModel.findOne({ email: email }).exec();
   }
@@ -73,15 +66,35 @@ export class UsersService {
 
 
   async updateUserById(id: string, updateData: EditUserDto) {
-    if (updateData.nickname) {
-      const isUnique = await this.userModel.findById(id).exec();
-      if (isUnique) throw new HttpException('Имя пользователя занято', HttpStatus.BAD_REQUEST)
-    }
-    const result = this.userModel.findByIdAndUpdate(id, { ...updateData });
-    if (result) {
-      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+    const isUniqueName = updateData.nickname ? await this.isUniqueName(updateData.nickname) : null;
+    const isUniqueEmail = updateData.email ? await this.isUniqueEmail(updateData.email) : null;
+    const isUniqueNumber = updateData.number ? await this.isUniqueNumber(updateData.number) : null;
+
+    console.log(isUniqueName, isUniqueEmail, isUniqueNumber)
+    if(isUniqueName && isUniqueEmail && isUniqueNumber) {
+      const result = this.userModel.findByIdAndUpdate(id, { ...updateData });
+      if (result) {
+        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+      } else {
+        throw new HttpException('Ошибка обновления данных', HttpStatus.BAD_REQUEST)
+      }
     } else {
-      throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND)
+      throw new HttpException('Ошибка обновления данных', HttpStatus.BAD_REQUEST)
     }
+  }
+
+  async isUniqueName(nickname: string) {
+    const result = await this.userModel.find({nickname}).exec()
+    return !result;
+  }
+
+  async isUniqueEmail(email: string) {
+    const result = await this.userModel.find({email}).exec()
+    return !result;
+  }
+
+  async isUniqueNumber(number: string) {
+    const result = await this.userModel.find({number}).exec()
+    return !result;
   }
 }

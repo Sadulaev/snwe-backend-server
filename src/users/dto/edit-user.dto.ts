@@ -21,8 +21,4 @@ export class EditUserDto {
   @IsNotEmpty({ message: 'Номер телефона не может быть пустым' })
   @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
   readonly number?: string;
-
-  // @ValidateIf(obj => obj.password !== undefined)
-  @Validate(PasswordValidation)
-  readonly password?: string;
 }
