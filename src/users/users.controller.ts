@@ -65,4 +65,22 @@ export class UsersController {
   ) {
     return this.usersService.updateUserById(id, editUserDto);
   }
+
+  @Get('/checkName')
+  async isUniqueName(@Param('name') name: string) {
+    return this.usersService.isUniqueName(name)
+  }
+  @Get('/checkEmail')
+  async isUniqueEmail(@Param('email') email: string) {
+    return this.usersService.isUniqueEmail(email)
+  }
+    @Get('/checkName')
+  async isUniqueNumber(@Param('number') number: string) {
+    return this.usersService.isUniqueNumber(number)
+  }
+
+  @Get('/mail/confirm/:link')
+  async confirmAccount(@Param('link') link: string) {
+    return this.usersService.activateUser(link)
+  }
 }

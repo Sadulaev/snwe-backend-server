@@ -10,16 +10,8 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    let message = {};
-    await this.userModel.findOne({ nickname: createUserDto.nickname }).exec() ? message = { nickname: 'Имя пользователя занято' } : false;
-    createUserDto.email ? await this.userModel.findOne({ email: createUserDto.email }).exec() ? message = { ...message, email: 'Почтовый ящик уже зарегистрирован на сайте' } : false : false;
-    await this.userModel.findOne({ number: createUserDto.number }).exec() ? message = { ...message, number: 'Номер уже зарегистрирован на сайте' } : false;
-    if (Object.keys(message).length) {
-      throw new HttpException(message, HttpStatus.BAD_REQUEST)
-    } else {
-      const createdUser = new this.userModel(createUserDto);
-      return createdUser.save();
-    }
+    const createdUser = new this.userModel(createUserDto);
+    return createdUser.save();
   }
 
   async findAll(): Promise<User[]> {
@@ -71,7 +63,7 @@ export class UsersService {
     const isUniqueNumber = updateData.number ? await this.isUniqueNumber(updateData.number) : null;
 
     console.log(isUniqueName, isUniqueEmail, isUniqueNumber)
-    if(isUniqueName && isUniqueEmail && isUniqueNumber) {
+    if (isUniqueName && isUniqueEmail && isUniqueNumber) {
       const result = this.userModel.findByIdAndUpdate(id, { ...updateData });
       if (result) {
         throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
@@ -84,17 +76,29 @@ export class UsersService {
   }
 
   async isUniqueName(nickname: string) {
-    const result = await this.userModel.find({nickname}).exec()
+    const result = await this.userModel.find({ nickname }).exec()
     return !result;
   }
 
   async isUniqueEmail(email: string) {
-    const result = await this.userModel.find({email}).exec()
+    const result = await this.userModel.find({ email }).exec()
     return !result;
   }
 
   async isUniqueNumber(number: string) {
-    const result = await this.userModel.find({number}).exec()
+    const result = await this.userModel.find({ number }).exec()
     return !result;
+  }
+
+  //Activate user profile
+  async activateUser(link: string) {
+    const user = await this.userModel.findOne({activationLink: link}).exec()
+    if(user) {
+        await this.userModel.findByIdAndUpdate(user._id, {isActivated: true})
+        throw new HttpException('Почта была успешно подтверждена', HttpStatus.OK)
+    } else {
+      throw new HttpException('Ошибка подтверждения почтового адреса', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
   }
 }

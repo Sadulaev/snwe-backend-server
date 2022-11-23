@@ -20,7 +20,7 @@ export class ProductsService {
             throw new HttpException('Категория с таким названием уже сущетсвует', HttpStatus.BAD_REQUEST)
         } else {
             new this.categoryModel(createCategoryDto).save()
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+            throw new HttpException('Данные были успешно добавлены', HttpStatus.CREATED)
         }
     }
 
@@ -90,12 +90,12 @@ export class ProductsService {
         return await this.mixtureModel.find().exec()
     }
 
-    async searchMixtures(skip: string, counter:string) {
-        const count =  (await this.mixtureModel.find().exec()).length
+    async searchMixtures(skip: string, counter: string) {
+        const count = (await this.mixtureModel.find().exec()).length
         const result = await this.mixtureModel.find().skip(+skip || 0).limit(+counter)
         const currentCount = (+counter) + (+skip || 0)
         console.log(skip, counter)
-        return {data: result, isMore: count > currentCount}
+        return { data: result, isMore: count > currentCount }
     }
 
     async createNutrition(createNutritionDto: CreateNutritionDto): Promise<Nutrition> {
@@ -140,12 +140,12 @@ export class ProductsService {
         const search = {};
         name ? search['title'] = new RegExp('^' + name, 'i') : ''
         category ? search['category'] = category : ''
-        from || to ? search['price'] = {$gt: +from-1 || 0, $lt: +to+1 || 100000} : ''
+        from || to ? search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 100000 } : ''
 
         // console.log(search, skip, counter)
         const count = (await this.nutritionModel.find(search).exec()).length
         const result = await this.nutritionModel.find(search).skip(+skip).limit(+counter).exec()
         const currentCount = (+counter) + (+skip || 0)
-        return {data: result, isMore: (count > currentCount)}
+        return { data: result, isMore: (count > currentCount) }
     }
 }

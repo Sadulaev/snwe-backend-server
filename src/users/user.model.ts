@@ -20,10 +20,13 @@ export class User {
   password: string;
 
   // @Prop({ default: [] })
-  // shopHistry: string[];
+  // favorite: string[];
 
-  @Prop({ default: [] })
-  favorite: string[];
+  @Prop({default: false})
+  isActivated: boolean;
+
+  @Prop({unique: true})
+  activationLink: string;
 
   @Prop({ default: false })
   banned: boolean;

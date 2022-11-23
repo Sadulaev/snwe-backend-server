@@ -5,6 +5,7 @@ import {
   Validate,
   IsNotEmpty,
   IsDefined,
+  IsUUID,
 } from 'class-validator';
 import { PasswordValidation } from '../../validation/PasswordValidation';
 
@@ -25,4 +26,7 @@ export class CreateUserDto {
   @IsDefined({message: "Поле не может быть пустым"})
   @Validate(PasswordValidation)
   readonly password: string;
+
+  @IsUUID(4,{message: 'Ошибка создания ссылки активации почты'})  
+  readonly activationLink: string;
 }
