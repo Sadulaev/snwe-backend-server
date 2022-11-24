@@ -11,7 +11,7 @@ export class MailService {
         const url = `${process.env.API_URL}/users/mail/confirm/${link}`
         console.log(user.email)
         try {
-            const info = await this.mailerService.sendMail({
+            await this.mailerService.sendMail({
                 from: process.env.SMTP_USER,
                 to: user.email,
                 subject: 'Welcome to Super Nutrition! Confirm your Email',
@@ -21,7 +21,6 @@ export class MailService {
                     url
                 }
             });
-            console.log(info)
         } catch (e) {
             console.log(e)
         }

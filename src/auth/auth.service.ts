@@ -20,13 +20,6 @@ export class AuthService {
     constructor(@InjectModel(Token.name) private tokenModel: Model<TokenDocument>, private usersService: UsersService, private adminsService: AdminsService, private jwtService: JwtService, private mailService: MailService) { }
 
     async userRegist(userDto: CreateUserDto) {
-        console.log(process.env.JWT_ACCESS_KEY)
-        console.log(process.env.JWT_REFRESH_KEY)
-        console.log(process.env.SMTP_HOST)
-        console.log(process.env.SMTP_PORT)
-        console.log(process.env.SMTP_USER)
-        console.log(process.env.SMTP_PASSWORD)
-
         let message = [];
         await this.usersService.findUserByName(userDto.nickname) && message.push('Имя пользователя занято');
         await this.usersService.findUserByEmail(userDto.email) && message.push('Почтовый ящик уже зарегистрирован на сайте');
@@ -92,6 +85,71 @@ export class AuthService {
         }
     }
 
+    //Activate user account 
+
+    async confirmMail(link: string) {
+        try {
+            return this.usersService.activateUser(link)
+        } catch (e) {
+            console.log(e)
+            throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    //LogOut for Users
+
+    async logout(token: string) {
+        try {
+            const result = await this.tokenModel.deleteOne({ token }).exec()
+            return result
+        } catch (e) {
+            throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    //Update refresh for Users
+
+    async refresh(refreshToken: string) {
+        if (!refreshToken) {
+            throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED)
+        }
+        const userData = this.validateRefreshToken(refreshToken);
+        const tokenFromDb = await this.findToken(refreshToken);
+        if (!userData || !tokenFromDb) {
+            throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED)
+        }
+        console.log(userData)
+        const user = await this.usersService.findUserById(userData.id)
+        const tokens = await this.generateUserTokens(user, false)
+        await this.saveToken(user._id, tokens.refreshToken)
+        return { ...tokens }
+    }
+
+    private async validateAccessToken(token: string) {
+        try {
+            const userData = this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_KEY });
+            return userData;
+        } catch (e) {
+            console.log(e)
+            return null;
+        }
+
+    }
+
+    private validateRefreshToken(token: string) {
+        try {
+            const userData = this.jwtService.verify(token, { secret: process.env.JWT_REFRESH_KEY });
+            return userData;
+        } catch (e) {
+            console.log(e)
+            return null;
+        }
+    }
+
+    private async findToken(refreshToken) {
+        return await this.tokenModel.findOne({ token: refreshToken }).exec()
+    }
+
     //Admin's services (Admin have no registration function because of only global admin with accessLvl 0 can create another admin)
 
     async adminLogin(loginAdminDto: LoginAdminDto) {
@@ -118,4 +176,5 @@ export class AuthService {
             throw new HttpException('Неверный логин или пароль', HttpStatus.BAD_REQUEST)
         }
     }
+
 }

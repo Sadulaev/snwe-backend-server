@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { User, UserDocument } from './user.model';
+import * as bcrypt from 'bcryptjs'
+
 
 @Injectable()
 export class UsersService {
@@ -18,23 +20,6 @@ export class UsersService {
     return this.userModel.find().exec();
   }
 
-  async removeUserById(id: string) {
-    const result = await this.userModel.findByIdAndRemove(id).exec();
-    if (result) {
-      throw new HttpException('Пользователь успешно удален', HttpStatus.OK)
-    } else {
-      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND)
-    }
-  }
-
-  // async removeAllUsers(): Promise<User[]> {
-  //   const users = await this.userModel.find();
-  //   users.forEach((user) => {
-  //     this.userModel.findByIdAndRemove(user._id).exec();
-  //   });
-  //   return users;
-  // }
-
   async findUserById(id: string): Promise<User> {
     const result = await this.userModel.findById(id).exec();
     if (result) {
@@ -45,60 +30,92 @@ export class UsersService {
   }
 
   async findUserByName(nickname: string): Promise<User> {
-    return await this.userModel.findOne({ nickname: nickname }).exec();
+    return await this.userModel.findOne({ nickname }).exec();
   }
   async findUserByEmail(email: string): Promise<User> {
-    return await this.userModel.findOne({ email: email }).exec();
+    return await this.userModel.findOne({ email }).exec();
   }
-
 
   async findUserByNumber(number: string): Promise<User> {
-    return await this.userModel.findOne({ number: number }).exec();
+    return await this.userModel.findOne({ number }).exec();
   }
 
+  async updateUserName(id: string, nickname: string) {
+    const isUniqueName = await this.findUserByName(nickname)
+    console.log(isUniqueName)
+    if (isUniqueName) {
+      throw new HttpException('Имя пользователя занято', HttpStatus.BAD_REQUEST)
+    }
+    try {
+      await this.userModel.findByIdAndUpdate(id, { nickname })
+    } catch (e) {
+      console.log(e)
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+    throw new HttpException('Имя пользователя было успешно обновлено', HttpStatus.OK)
+  }
 
-  async updateUserById(id: string, updateData: EditUserDto) {
-    const isUniqueName = updateData.nickname ? await this.isUniqueName(updateData.nickname) : null;
-    const isUniqueEmail = updateData.email ? await this.isUniqueEmail(updateData.email) : null;
-    const isUniqueNumber = updateData.number ? await this.isUniqueNumber(updateData.number) : null;
+  async updateUserEmail(id: string, email: string) {
+    const isUniqueEmail = await this.findUserByEmail(email)
+    if (isUniqueEmail) {
+      throw new HttpException('Пользотель с такой почтой уже зарегистрироован', HttpStatus.BAD_REQUEST)
+    }
+    try {
+      await this.userModel.findByIdAndUpdate(id, { email, isActivated: false })
+    } catch (e) {
+      console.log(e)
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+    throw new HttpException('Почта пользователя была успешно обновлена', HttpStatus.OK)
+  }
 
-    console.log(isUniqueName, isUniqueEmail, isUniqueNumber)
-    if (isUniqueName && isUniqueEmail && isUniqueNumber) {
-      const result = this.userModel.findByIdAndUpdate(id, { ...updateData });
-      if (result) {
-        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
+  async updateUserNumber(id: string, number: string) {
+    const isUniqueNumber = await this.findUserByName(number)
+    if (isUniqueNumber) {
+      throw new HttpException('Номер телефона занят.', HttpStatus.BAD_REQUEST)
+    }
+    try {
+      await this.userModel.findByIdAndUpdate(id, { number })
+    } catch (e) {
+      console.log(e)
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+    throw new HttpException('Номер пользователя был успешно обновлен', HttpStatus.OK)
+  }
+
+  async updateUserPassword(id: string, password: string, previousPassword: string) {
+    const user = await this.findUserById(id)
+
+    if (user) {
+      const checkPassword = await bcrypt.compare(previousPassword, user.password)
+
+      if (checkPassword) {
+        const hashPassword = await bcrypt.hash(password, +(process.env.BCRYPT_HASH))
+
+        try {
+          await this.userModel.findByIdAndUpdate(id, { password: hashPassword })
+        } catch (e) {
+          console.log(e)
+          throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+        throw new HttpException('Пароль успешно обновлен', HttpStatus.OK)
+
       } else {
-        throw new HttpException('Ошибка обновления данных', HttpStatus.BAD_REQUEST)
+        throw new HttpException('Неверный пароль', HttpStatus.BAD_REQUEST)
       }
     } else {
-      throw new HttpException('Ошибка обновления данных', HttpStatus.BAD_REQUEST)
+      throw new HttpException('Неверный пароль', HttpStatus.BAD_REQUEST)
     }
-  }
-
-  async isUniqueName(nickname: string) {
-    const result = await this.userModel.find({ nickname }).exec()
-    return !result;
-  }
-
-  async isUniqueEmail(email: string) {
-    const result = await this.userModel.find({ email }).exec()
-    return !result;
-  }
-
-  async isUniqueNumber(number: string) {
-    const result = await this.userModel.find({ number }).exec()
-    return !result;
   }
 
   //Activate user profile
   async activateUser(link: string) {
-    const user = await this.userModel.findOne({activationLink: link}).exec()
-    if(user) {
-        await this.userModel.findByIdAndUpdate(user._id, {isActivated: true})
-        throw new HttpException('Почта была успешно подтверждена', HttpStatus.OK)
+    const user = await this.userModel.findOne({ activationLink: link }).exec()
+    if (user) {
+      await this.userModel.findByIdAndUpdate(user._id, { isActivated: true })
+      throw new HttpException('Почта была успешно подтверждена', HttpStatus.OK)
     } else {
       throw new HttpException('Ошибка подтверждения почтового адреса', HttpStatus.INTERNAL_SERVER_ERROR)
     }
-
   }
 }

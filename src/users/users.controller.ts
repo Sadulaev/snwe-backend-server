@@ -6,7 +6,9 @@ import {
   Put,
   Body,
   Param,
-  UseGuards
+  UseGuards,
+  Redirect,
+  Req,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.model';
@@ -15,6 +17,9 @@ import { ValidationPipe } from '../pipes/validation.pipe';
 import { EditUserDto } from './dto/edit-user.dto';
 import { Access } from 'src/auth/access.decorator';
 import { AccessGuard } from 'src/auth/access.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -27,60 +32,55 @@ export class UsersController {
     return this.usersService.createUser(createUserDto);
   }
 
-  @Delete('/remove/:id')
-  async removeUserById(@Param('id') id: string) {
-    return this.usersService.removeUserById(id);
-  }
-  @Access([0])
+  @Access([0, 1])
   @UseGuards(AccessGuard)
   @Get('/getAll')
   async findAllUsers(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
-  @Get('/getId/:id')
-  async findUserById(@Param('id') id: string): Promise<User> {
-    return this.usersService.findUserById(id);
+  @UseGuards(JwtAuthGuard)
+  @Get('/getById')
+  async findUserById(@Req() req): Promise<User> {
+    return this.usersService.findUserById(req.user.id);
   }
 
-  @Get('/getName/:nickname')
-  async findUserByName(@Param('nickname') nickname: string): Promise<User> {
-    return this.usersService.findUserByName(nickname);
+  @UseGuards(JwtAuthGuard)
+  @Put('/edit/nickname')
+  async editName(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
+    return this.usersService.updateUserName(req.user.id, editUserDto.nickname)
   }
 
-  @Get('/getMail/:email')
-  async findUserByEmail(@Param('email') email: string): Promise<User> {
-    return this.usersService.findUserByEmail(email);
+  @UseGuards(JwtAuthGuard)
+  @Put('/edit/email')
+  async editEmail(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
+    return this.usersService.updateUserEmail(req.user.id, editUserDto.email)
   }
 
-  @Get('/getNumber/:number')
-  async findUserByNumber(@Param('number') number: string): Promise<User> {
-    return this.usersService.findUserByNumber(number);
+  @UseGuards(JwtAuthGuard)
+  @Put('/edit/number')
+  async editNumber(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
+    return this.usersService.updateUserNumber(req.user.id, editUserDto.number)
   }
 
-  @Put('/updateId/:id')
-  async updateUser(
-    @Param('id') id: string,
-    @Body(new ValidationPipe()) editUserDto: EditUserDto,
-  ) {
-    return this.usersService.updateUserById(id, editUserDto);
+  @UseGuards(JwtAuthGuard)
+  @Put('/edit/password')
+  async editPassword(@Body(new ValidationPipe()) changePasswordDto: ChangePasswordDto, @Req() req) {
+    return this.usersService.updateUserPassword(req.user.id, changePasswordDto.password, changePasswordDto.previousPassword)
   }
 
-  @Get('/checkName')
-  async isUniqueName(@Param('name') name: string) {
-    return this.usersService.isUniqueName(name)
-  }
-  @Get('/checkEmail')
-  async isUniqueEmail(@Param('email') email: string) {
-    return this.usersService.isUniqueEmail(email)
-  }
-    @Get('/checkName')
-  async isUniqueNumber(@Param('number') number: string) {
-    return this.usersService.isUniqueNumber(number)
-  }
+  // @Get('/getName/:nickname')
+  // async findUserByName(@Param('nickname') nickname: string): Promise<User> {
+  //   return this.usersService.findUserByName(nickname);
+  // }
 
-  @Get('/mail/confirm/:link')
-  async confirmAccount(@Param('link') link: string) {
-    return this.usersService.activateUser(link)
-  }
+  // @Get('/getMail/:email')
+  // async findUserByEmail(@Param('email') email: string): Promise<User> {
+  //   return this.usersService.findUserByEmail(email);
+  // }
+
+  // @Get('/getNumber/:number')
+  // async findUserByNumber(@Param('number') number: string): Promise<User> {
+  //   return this.usersService.findUserByNumber(number);
+  // }
 }
