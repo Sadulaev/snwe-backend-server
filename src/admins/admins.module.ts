@@ -1,7 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose'
 import { ProductsModule } from 'src/products/products.module';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersModule } from 'src/users/users.module';
 import { Admin, AdminSchema } from './admin.model';
 import { AdminsController } from './admins.controller';

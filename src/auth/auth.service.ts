@@ -19,6 +19,8 @@ import { MailService } from 'src/mail/mail.service';
 export class AuthService {
     constructor(@InjectModel(Token.name) private tokenModel: Model<TokenDocument>, private usersService: UsersService, private adminsService: AdminsService, private jwtService: JwtService, private mailService: MailService) { }
 
+    //User registration and authorization with helpers (private...)
+
     async userRegist(userDto: CreateUserDto) {
         let message = [];
         await this.usersService.findUserByName(userDto.nickname) && message.push('Имя пользователя занято');
@@ -107,7 +109,7 @@ export class AuthService {
         }
     }
 
-    //Update refresh for Users
+    //Update refresh token for Users
 
     async refresh(refreshToken: string) {
         if (!refreshToken) {
@@ -150,7 +152,7 @@ export class AuthService {
         return await this.tokenModel.findOne({ token: refreshToken }).exec()
     }
 
-    //Admin's services (Admin have no registration function because of only global admin with accessLvl 0 can create another admin)
+    //Admin's services (Admin have no registration function because of only global admin with accessLvl=0 can create another admin)
 
     async adminLogin(loginAdminDto: LoginAdminDto) {
         const admin = await this.validateAdmin(loginAdminDto)

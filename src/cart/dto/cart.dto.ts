@@ -14,5 +14,6 @@ export class CreateCartDto {
 
 export class updateCartDto {
     @IsDefined({message: 'Поле не может быть пустым'})
+    @IsMongoId({message: 'Некорректный идентификатор продукта'})
     products: string[];
 }

@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Delete,
   Put,
   Body,
   Param,
@@ -18,7 +17,6 @@ import { EditUserDto } from './dto/edit-user.dto';
 import { Access } from 'src/auth/access.decorator';
 import { AccessGuard } from 'src/auth/access.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Request } from 'express';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
