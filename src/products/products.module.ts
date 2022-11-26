@@ -4,7 +4,7 @@ import { ProductsController } from './products.controller';
 import { CategorySchema } from './category.model';
 import { NutritionSchema } from './nutrition.model';
 import { MixtureSchema } from './mixture.model';
-import { MongooseModule } from '@nestjs/mongoose'
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   providers: [ProductsService],
@@ -13,9 +13,9 @@ import { MongooseModule } from '@nestjs/mongoose'
     MongooseModule.forFeature([
       { name: 'Category', schema: CategorySchema },
       { name: 'Nutrition', schema: NutritionSchema },
-      { name: 'Mixture', schema: MixtureSchema }
-   ]),
+      { name: 'Mixture', schema: MixtureSchema },
+    ]),
   ],
-  exports: [ProductsService]
+  exports: [ProductsService],
 })
 export class ProductsModule {}

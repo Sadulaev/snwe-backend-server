@@ -5,21 +5,20 @@ import { User } from 'src/users/user.model';
 export type AdminDocument = HydratedDocument<Admin>;
 
 @Schema()
-export class Admin{
+export class Admin {
+  _id?: string;
 
-    _id?: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  userId: User;
 
-    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
-    userId: User;
+  @Prop({ required: true, unique: true })
+  nickname: string;
 
-    @Prop({required: true, unique: true})
-    nickname: string;
-    
-    @Prop({required: true})
-    password: string;
-    
-    @Prop({default: 1})
-    accessLvl: number;
+  @Prop({ required: true })
+  password: string;
+
+  @Prop({ default: 1 })
+  accessLvl: number;
 }
 
-export const AdminSchema = SchemaFactory.createForClass(Admin)
+export const AdminSchema = SchemaFactory.createForClass(Admin);

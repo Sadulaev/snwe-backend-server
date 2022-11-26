@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose'
+import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from './category.model';
 import { CreateCategoryDto, EditCategoryDto } from './dto/category.dto';
@@ -10,142 +10,209 @@ import { Nutrition, NutritionDocument } from './nutrition.model';
 
 @Injectable()
 export class ProductsService {
-    constructor(@InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-        @InjectModel(Nutrition.name) private nutritionModel: Model<NutritionDocument>,
-        @InjectModel(Mixture.name) private mixtureModel: Model<MixtureDocument>,) { }
+  constructor(
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+    @InjectModel(Nutrition.name)
+    private nutritionModel: Model<NutritionDocument>,
+    @InjectModel(Mixture.name) private mixtureModel: Model<MixtureDocument>,
+  ) {}
 
-    async createCategory(createCategoryDto: CreateCategoryDto) {
-        const isUnique = await this.categoryModel.findOne({ title: createCategoryDto.title }).exec();
-        if (isUnique) {
-            throw new HttpException('Категория с таким названием уже сущетсвует', HttpStatus.BAD_REQUEST)
-        } else {
-            new this.categoryModel(createCategoryDto).save()
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.CREATED)
-        }
+  async createCategory(createCategoryDto: CreateCategoryDto) {
+    const isUnique = await this.categoryModel
+      .findOne({ title: createCategoryDto.title })
+      .exec();
+    if (isUnique) {
+      throw new HttpException(
+        'Категория с таким названием уже сущетсвует',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else {
+      new this.categoryModel(createCategoryDto).save();
+      throw new HttpException(
+        'Данные были успешно добавлены',
+        HttpStatus.CREATED,
+      );
     }
+  }
 
-    async editCategory(id: string, updatedData: EditCategoryDto) {
-        if (updatedData.title) {
-            const isUnique = await this.categoryModel.findOne({ title: updatedData.title })
-            if (isUnique) {
-                throw new HttpException('Название категории не может повторяться', HttpStatus.BAD_REQUEST)
-            }
-        }
-        const result = await this.categoryModel.findByIdAndUpdate(id, { ...updatedData }).exec()
-        if (result) {
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
-        } else {
-            throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND)
-        }
+  async editCategory(id: string, updatedData: EditCategoryDto) {
+    if (updatedData.title) {
+      const isUnique = await this.categoryModel.findOne({
+        title: updatedData.title,
+      });
+      if (isUnique) {
+        throw new HttpException(
+          'Название категории не может повторяться',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
-
-    async getCategoryById(id: string): Promise<Category> {
-        const responce = await this.categoryModel.findById(id).exec()
-        if (!responce) {
-            throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND)
-        } else {
-            return responce;
-        }
+    const result = await this.categoryModel
+      .findByIdAndUpdate(id, { ...updatedData })
+      .exec();
+    if (result) {
+      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
+    } else {
+      throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND);
     }
+  }
 
-    async getAllCategories(): Promise<Category[]> {
-        return await this.categoryModel.find().exec()
+  async getCategoryById(id: string): Promise<Category> {
+    const responce = await this.categoryModel.findById(id).exec();
+    if (!responce) {
+      throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND);
+    } else {
+      return responce;
     }
+  }
 
-    async createMixture(createMixtureDto: CreateMixtureDto) {
-        const isUnique = await this.mixtureModel.findOne({ title: createMixtureDto.title }).exec();
-        if (isUnique) {
-            throw new HttpException('Смесь с таким названием уже сущетсвует', HttpStatus.BAD_REQUEST)
-        } else {
-            new this.mixtureModel(createMixtureDto).save()
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
-        }
+  async getAllCategories(): Promise<Category[]> {
+    return await this.categoryModel.find().exec();
+  }
+
+  async createMixture(createMixtureDto: CreateMixtureDto) {
+    const isUnique = await this.mixtureModel
+      .findOne({ title: createMixtureDto.title })
+      .exec();
+    if (isUnique) {
+      throw new HttpException(
+        'Смесь с таким названием уже сущетсвует',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else {
+      new this.mixtureModel(createMixtureDto).save();
+      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
     }
+  }
 
-    async editMixture(id: string, updatedData: EditMixtureDto) {
-        if (updatedData.title) {
-            const isUnique = await this.mixtureModel.findOne({ title: updatedData.title })
-            if (isUnique) {
-                throw new HttpException('Название смеси не может повторяться', HttpStatus.BAD_REQUEST)
-            }
-        }
-        const result = await this.mixtureModel.findByIdAndUpdate(id, { ...updatedData }).exec()
-        if (result) {
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
-        } else {
-            throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND)
-        }
+  async editMixture(id: string, updatedData: EditMixtureDto) {
+    if (updatedData.title) {
+      const isUnique = await this.mixtureModel.findOne({
+        title: updatedData.title,
+      });
+      if (isUnique) {
+        throw new HttpException(
+          'Название смеси не может повторяться',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
-
-    async getMixtureById(id: string): Promise<Mixture> {
-        const responce = await this.mixtureModel.findById(id).exec()
-        if (!responce) {
-            throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND)
-        } else {
-            return responce;
-        }
+    const result = await this.mixtureModel
+      .findByIdAndUpdate(id, { ...updatedData })
+      .exec();
+    if (result) {
+      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
+    } else {
+      throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND);
     }
+  }
 
-    async getAllMixtures(): Promise<Mixture[]> {
-        return await this.mixtureModel.find().exec()
+  async getMixtureById(id: string): Promise<Mixture> {
+    const responce = await this.mixtureModel.findById(id).exec();
+    if (!responce) {
+      throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND);
+    } else {
+      return responce;
     }
+  }
 
-    async searchMixtures(skip: string, counter: string) {
-        const count = (await this.mixtureModel.find().exec()).length
-        const result = await this.mixtureModel.find().skip(+skip || 0).limit(+counter)
-        const currentCount = (+counter) + (+skip || 0)
-        console.log(skip, counter)
-        return { data: result, isMore: count > currentCount }
+  async getAllMixtures(): Promise<Mixture[]> {
+    return await this.mixtureModel.find().exec();
+  }
+
+  async searchMixtures(skip: string, counter: string) {
+    const count = (await this.mixtureModel.find().exec()).length;
+    const result = await this.mixtureModel
+      .find()
+      .skip(+skip || 0)
+      .limit(+counter);
+    const currentCount = +counter + (+skip || 0);
+    console.log(skip, counter);
+    return { data: result, isMore: count > currentCount };
+  }
+
+  async createNutrition(
+    createNutritionDto: CreateNutritionDto,
+  ): Promise<Nutrition> {
+    const isUnique = await this.nutritionModel
+      .findOne({ title: createNutritionDto.title })
+      .exec();
+    if (isUnique) {
+      throw new HttpException(
+        'Питание с таким названием уже сущетсвует',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else {
+      const newNut = await new this.nutritionModel(createNutritionDto).save();
+      if (newNut) {
+        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
+      } else {
+        throw new HttpException(
+          'Ошибка на стороне сервера',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
+  }
 
-    async createNutrition(createNutritionDto: CreateNutritionDto): Promise<Nutrition> {
-        const isUnique = await this.nutritionModel.findOne({ title: createNutritionDto.title }).exec();
-        if (isUnique) {
-            throw new HttpException('Питание с таким названием уже сущетсвует', HttpStatus.BAD_REQUEST)
-        } else {
-            const newNut = await new this.nutritionModel(createNutritionDto).save()
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
-        }
+  async editNutrition(id: string, updatedData: EditNutritionDto) {
+    if (updatedData.title) {
+      const isUnique = await this.nutritionModel.findOne({
+        title: updatedData.title,
+      });
+      if (isUnique) {
+        throw new HttpException(
+          'Название питания не может повторяться',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
-
-    async editNutrition(id: string, updatedData: EditNutritionDto) {
-        if (updatedData.title) {
-            const isUnique = await this.nutritionModel.findOne({ title: updatedData.title })
-            if (isUnique) {
-                throw new HttpException('Название питания не может повторяться', HttpStatus.BAD_REQUEST)
-            }
-        }
-        const result = await this.nutritionModel.findByIdAndUpdate(id, { ...updatedData }).exec()
-        if (result) {
-            throw new HttpException('Данные были успешно добавлены', HttpStatus.OK)
-        } else {
-            throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND)
-        }
+    const result = await this.nutritionModel
+      .findByIdAndUpdate(id, { ...updatedData })
+      .exec();
+    if (result) {
+      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
+    } else {
+      throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
     }
+  }
 
-    async getNutritionById(id: string) {
-        const responce = await this.nutritionModel.findById(id).exec()
-        if (!responce) {
-            throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND)
-        } else {
-            return responce;
-        }
+  async getNutritionById(id: string) {
+    const responce = await this.nutritionModel.findById(id).exec();
+    if (!responce) {
+      throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
+    } else {
+      return responce;
     }
+  }
 
-    async getAllNutritions(): Promise<Nutrition[]> {
-        return await this.nutritionModel.find().exec()
-    }
+  async getAllNutritions(): Promise<Nutrition[]> {
+    return await this.nutritionModel.find().exec();
+  }
 
-    async searchNutritions(name: string | null, category: string | null, from: string, to: string, skip: string, counter: string) {
-        const search = {};
-        name ? search['title'] = new RegExp('^' + name, 'i') : ''
-        category ? search['category'] = category : ''
-        from || to ? search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 100000 } : ''
+  async searchNutritions(
+    name: string | null,
+    category: string | null,
+    from: string,
+    to: string,
+    skip: string,
+    counter: string,
+  ) {
+    const search = {};
+    name ? (search['title'] = new RegExp('^' + name, 'i')) : '';
+    category ? (search['category'] = category) : '';
+    from || to
+      ? (search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 100000 })
+      : '';
 
-        // console.log(search, skip, counter)
-        const count = (await this.nutritionModel.find(search).exec()).length
-        const result = await this.nutritionModel.find(search).skip(+skip).limit(+counter).exec()
-        const currentCount = (+counter) + (+skip || 0)
-        return { data: result, isMore: (count > currentCount) }
-    }
+    // console.log(search, skip, counter)
+    const count = (await this.nutritionModel.find(search).exec()).length;
+    const result = await this.nutritionModel
+      .find(search)
+      .skip(+skip)
+      .limit(+counter)
+      .exec();
+    const currentCount = +counter + (+skip || 0);
+    return { data: result, isMore: count > currentCount };
+  }
 }

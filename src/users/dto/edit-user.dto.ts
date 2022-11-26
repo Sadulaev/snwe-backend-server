@@ -3,10 +3,9 @@ import {
   Length,
   IsPhoneNumber,
   IsNotEmpty,
-  Validate
+  Validate,
 } from 'class-validator';
 import { PasswordValidation } from '../../validation/PasswordValidation';
-
 
 export class EditUserDto {
   @Length(4, 16, { message: 'Логин должен быть длиной от 4 до 12 символов' })

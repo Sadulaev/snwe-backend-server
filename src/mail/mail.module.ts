@@ -2,12 +2,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { MailService } from './mail.service';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({envFilePath: `.${process.env.NODE_ENV}.env`}),
+    ConfigModule.forRoot({ envFilePath: `.${process.env.NODE_ENV}.env` }),
     MailerModule.forRoot({
       transport: {
         service: process.env.SMTP_SERVICE,
@@ -16,22 +16,22 @@ import { ConfigModule } from '@nestjs/config';
         secure: false,
         auth: {
           user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD
+          pass: process.env.SMTP_PASSWORD,
         },
       },
       defaults: {
-        from: '"No Reply" <noreply@example.com>'
+        from: '"No Reply" <noreply@example.com>',
       },
       template: {
         dir: join(__dirname, 'templates'),
         adapter: new HandlebarsAdapter(),
         options: {
-          strict: true
-        }
-      }
-    })
+          strict: true,
+        },
+      },
+    }),
   ],
   providers: [MailService],
   exports: [MailService],
 })
-export class MailModule { }
+export class MailModule {}

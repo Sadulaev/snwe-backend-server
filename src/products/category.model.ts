@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type CategoryDocument = HydratedDocument<Category>;
 
@@ -10,7 +10,7 @@ export class Category {
   @Prop({ required: true, unique: true })
   title: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   description: string;
 }
 

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -22,10 +22,10 @@ export class User {
   // @Prop({ default: [] })
   // favorite: string[];
 
-  @Prop({default: false})
+  @Prop({ default: false })
   isActivated: boolean;
 
-  @Prop({unique: true})
+  @Prop({ unique: true })
   activationLink: string;
 
   @Prop({ default: false })

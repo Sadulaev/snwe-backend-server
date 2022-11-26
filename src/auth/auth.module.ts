@@ -19,13 +19,10 @@ import { Token, TokenSchema } from './token.model';
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
       signOptions: {
-        expiresIn: '24h'
-      }
-    })
+        expiresIn: '24h',
+      },
+    }),
   ],
-    exports: [
-      AuthService,
-      JwtModule,
-    ]
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

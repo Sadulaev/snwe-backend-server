@@ -1,19 +1,19 @@
-import { IsMongoId, IsDefined } from "class-validator";
+import { IsMongoId, IsDefined } from 'class-validator';
 
 export class CreateCartDto {
-    @IsDefined({message: 'Поле не может быть пустым'})
-    @IsMongoId({message: 'Некорректный идентификатор пользователя'})
-    userId: string;
+  @IsDefined({ message: 'Поле не может быть пустым' })
+  @IsMongoId({ message: 'Некорректный идентификатор пользователя' })
+  userId: string;
 
-    products: string[];
+  products: string[];
 
-    price: number;
+  price: number;
 
-    discoundSum: number;
+  discoundSum: number;
 }
 
 export class updateCartDto {
-    @IsDefined({message: 'Поле не может быть пустым'})
-    @IsMongoId({message: 'Некорректный идентификатор продукта'})
-    products: string[];
+  @IsDefined({ message: 'Поле не может быть пустым' })
+  @IsMongoId({ message: 'Некорректный идентификатор продукта' })
+  products: string[];
 }

@@ -4,9 +4,9 @@ import {
   Post,
   Put,
   Body,
-  Param,
+  // Param,
   UseGuards,
-  Redirect,
+  // Redirect,
   Req,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,26 +45,42 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Put('/edit/nickname')
-  async editName(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
-    return this.usersService.updateUserName(req.user.id, editUserDto.nickname)
+  async editName(
+    @Body(new ValidationPipe()) editUserDto: EditUserDto,
+    @Req() req,
+  ) {
+    return this.usersService.updateUserName(req.user.id, editUserDto.nickname);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('/edit/email')
-  async editEmail(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
-    return this.usersService.updateUserEmail(req.user.id, editUserDto.email)
+  async editEmail(
+    @Body(new ValidationPipe()) editUserDto: EditUserDto,
+    @Req() req,
+  ) {
+    return this.usersService.updateUserEmail(req.user.id, editUserDto.email);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('/edit/number')
-  async editNumber(@Body(new ValidationPipe()) editUserDto: EditUserDto, @Req() req) {
-    return this.usersService.updateUserNumber(req.user.id, editUserDto.number)
+  async editNumber(
+    @Body(new ValidationPipe()) editUserDto: EditUserDto,
+    @Req() req,
+  ) {
+    return this.usersService.updateUserNumber(req.user.id, editUserDto.number);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('/edit/password')
-  async editPassword(@Body(new ValidationPipe()) changePasswordDto: ChangePasswordDto, @Req() req) {
-    return this.usersService.updateUserPassword(req.user.id, changePasswordDto.password, changePasswordDto.previousPassword)
+  async editPassword(
+    @Body(new ValidationPipe()) changePasswordDto: ChangePasswordDto,
+    @Req() req,
+  ) {
+    return this.usersService.updateUserPassword(
+      req.user.id,
+      changePasswordDto.password,
+      changePasswordDto.previousPassword,
+    );
   }
 
   // @Get('/getName/:nickname')

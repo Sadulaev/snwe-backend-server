@@ -7,76 +7,108 @@ import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
-    constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) {}
 
-    @Post('/category/create')
-    async createCategory(@Body(new ValidationPipe()) createCategoryDto: CreateCategoryDto) {
-        return this.productsService.createCategory(createCategoryDto)
-    }
+  @Post('/category/create')
+  async createCategory(
+    @Body(new ValidationPipe()) createCategoryDto: CreateCategoryDto,
+  ) {
+    return this.productsService.createCategory(createCategoryDto);
+  }
 
-    @Put('/category/edit/:id')
-    async editCategory(@Param('id') id: string, @Body(new ValidationPipe()) editCategoryDto: EditCategoryDto) {
-        return this.productsService.editCategory(id, editCategoryDto)
-    }
+  @Put('/category/edit/:id')
+  async editCategory(
+    @Param('id') id: string,
+    @Body(new ValidationPipe()) editCategoryDto: EditCategoryDto,
+  ) {
+    return this.productsService.editCategory(id, editCategoryDto);
+  }
 
-    @Get('/category/getById/:id')
-    async getCategoryById(@Param('id') id: string) {
-        return this.productsService.getCategoryById(id)
-    }
+  @Get('/category/getById/:id')
+  async getCategoryById(@Param('id') id: string) {
+    return this.productsService.getCategoryById(id);
+  }
 
-    @Get('/category/getAll')
-    async getAllCategories() {
-        return this.productsService.getAllCategories()
-    }
+  @Get('/category/getAll')
+  async getAllCategories() {
+    return this.productsService.getAllCategories();
+  }
 
-    @Post('/nutrition/create')
-    async createNutrition(@Body(new ValidationPipe()) createNutritionDto: CreateNutritionDto) {
-        return this.productsService.createNutrition(createNutritionDto)
-    }
+  @Post('/nutrition/create')
+  async createNutrition(
+    @Body(new ValidationPipe()) createNutritionDto: CreateNutritionDto,
+  ) {
+    return this.productsService.createNutrition(createNutritionDto);
+  }
 
-    @Put('/nutrition/edit/:id')
-    async editNutrition(@Param('id') id: string, @Body(new ValidationPipe()) editNutritionDto: EditNutritionDto) {
-        return this.productsService.editNutrition(id, editNutritionDto)
-    }
+  @Put('/nutrition/edit/:id')
+  async editNutrition(
+    @Param('id') id: string,
+    @Body(new ValidationPipe()) editNutritionDto: EditNutritionDto,
+  ) {
+    return this.productsService.editNutrition(id, editNutritionDto);
+  }
 
-    @Get('/nutrition/getById/:id')
-    async getNutritionById(@Param('id') id: string) {
-        return this.productsService.getNutritionById(id)
-    }
+  @Get('/nutrition/getById/:id')
+  async getNutritionById(@Param('id') id: string) {
+    return this.productsService.getNutritionById(id);
+  }
 
-    @Get('/nutrition/getAll')
-    async getAllNutritions() {
-        return this.productsService.getAllNutritions()
-    }
+  @Get('/nutrition/getAll')
+  async getAllNutritions() {
+    return this.productsService.getAllNutritions();
+  }
 
-    @Get('/nutritions/getByQuery')
-    async getNutritionsByQuery(@Query('title') title: string, @Query('category') category: string, @Query('from') from: string, @Query('to') to: string,@Query('skip') skip: string, @Query('counter') counter: string,) {
-        return this.productsService.searchNutritions(title, category, from, to, skip, counter)
-    }
+  @Get('/nutritions/getByQuery')
+  async getNutritionsByQuery(
+    @Query('title') title: string,
+    @Query('category') category: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Query('skip') skip: string,
+    @Query('counter') counter: string,
+  ) {
+    return this.productsService.searchNutritions(
+      title,
+      category,
+      from,
+      to,
+      skip,
+      counter,
+    );
+  }
 
-    @Post('/mixture/create')
-    async createMixture(@Body(new ValidationPipe()) createMixtureDto: CreateMixtureDto) {
-        return this.productsService.createMixture(createMixtureDto)
-    }
+  @Post('/mixture/create')
+  async createMixture(
+    @Body(new ValidationPipe()) createMixtureDto: CreateMixtureDto,
+  ) {
+    return this.productsService.createMixture(createMixtureDto);
+  }
 
-    @Put('/mixture/edit/:id')
-    async editMixture(@Param('id') id: string, @Body(new ValidationPipe()) editMixtureDto: EditMixtureDto) {
-        return this.productsService.editMixture(id, editMixtureDto)
-    }
+  @Put('/mixture/edit/:id')
+  async editMixture(
+    @Param('id') id: string,
+    @Body(new ValidationPipe()) editMixtureDto: EditMixtureDto,
+  ) {
+    return this.productsService.editMixture(id, editMixtureDto);
+  }
 
-    @Get('/mixture/getById/:id')
-    async getMixtureById(@Param('id') id: string) {
-        return this.productsService.getMixtureById(id)
-    }
+  @Get('/mixture/getById/:id')
+  async getMixtureById(@Param('id') id: string) {
+    return this.productsService.getMixtureById(id);
+  }
 
-    @Get('/mixture/getAll')
-    async getAllMixtures() {
-        return this.productsService.getAllMixtures()
-    }
+  @Get('/mixture/getAll')
+  async getAllMixtures() {
+    return this.productsService.getAllMixtures();
+  }
 
-    @Get('/mixtures/getByQuery')
-    async getMixturesByQuery(@Query('skip') skip: string, @Query('counter') counter: string) {
-        console.log(skip, counter)
-        return this.productsService.searchMixtures(skip, counter)
-    }
+  @Get('/mixtures/getByQuery')
+  async getMixturesByQuery(
+    @Query('skip') skip: string,
+    @Query('counter') counter: string,
+  ) {
+    console.log(skip, counter);
+    return this.productsService.searchMixtures(skip, counter);
+  }
 }

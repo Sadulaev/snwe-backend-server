@@ -15,7 +15,7 @@ export class ValidationPipe implements PipeTransform<any> {
     });
 
     if (errors.length) {
-      let messages='';
+      let messages = '';
       errors.forEach((err) => {
         messages += `${Object.values(err.constraints).join(', ')}.`;
       });
@@ -24,4 +24,3 @@ export class ValidationPipe implements PipeTransform<any> {
     return value;
   }
 }
-
