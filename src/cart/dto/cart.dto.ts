@@ -4,16 +4,22 @@ export class CreateCartDto {
   @IsDefined({ message: 'Поле не может быть пустым' })
   @IsMongoId({ message: 'Некорректный идентификатор пользователя' })
   userId: string;
-
-  products: string[];
-
-  price: number;
-
-  discoundSum: number;
 }
 
-export class updateCartDto {
-  @IsDefined({ message: 'Поле не может быть пустым' })
-  @IsMongoId({ message: 'Некорректный идентификатор продукта' })
-  products: string[];
+export class UpdateCartDto {
+  @IsDefined({ message: 'Поле идентификатора продукта не может быть пустым' })
+  // @IsMongoId({ message: 'Некорректный идентификатор продукта' })
+  productId: string;
+  @IsDefined({message: 'Поле типа продукта не может быть пустым'})
+  type: 'mixture' | 'nutrition';
+}
+
+export interface Product {
+  _id: string,
+  count: number,
+}
+
+export class CalculatePrice {
+  nutritions?: Product[];
+  mixtures?: Product[];
 }

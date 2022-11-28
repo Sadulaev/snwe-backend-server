@@ -14,6 +14,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Token, TokenDocument } from './token.model';
 import { MailService } from 'src/mail/mail.service';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
     private adminsService: AdminsService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private cartService: CartService,
   ) {}
 
   //User registration and authorization with helpers (private...)
@@ -56,6 +58,8 @@ export class AuthService {
       activationLink,
     );
 
+    await this.cartService.getCartByUserId(result._id)
+
     if (result) {
       throw new HttpException('Регистрация прошла успешно', HttpStatus.CREATED);
     } else {
@@ -69,7 +73,7 @@ export class AuthService {
   async userLogin(loginUserDto: LoginUserDto, rememberUser: boolean) {
     const user = await this.validateUser(loginUserDto);
     const tokens = await this.generateUserTokens(user, rememberUser);
-    await this.saveToken(user._id, tokens.refreshToken);
+    await this.saveToken(user._id, tokens.refreshToken, rememberUser);
     return { ...tokens, user };
   }
 
@@ -82,23 +86,23 @@ export class AuthService {
 
     const accesToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_KEY,
-      expiresIn: '10s',
+      expiresIn: '1h',
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_KEY,
-      expiresIn: rememberUser ? '21d' : '20s',
+      expiresIn: rememberUser ? '21d' : '1d',
     });
 
     return { accesToken, refreshToken };
   }
 
-  private async saveToken(userId: string, refreshToken: string) {
+  private async saveToken(userId: string, refreshToken: string, rememberSession: boolean) {
     const tokenData = await this.tokenModel.findOne({ userId }).exec();
     if (tokenData) {
       tokenData.token = refreshToken;
       return tokenData.save();
     }
-    const token = new this.tokenModel({ userId, token: refreshToken });
+    const token = new this.tokenModel({ userId, token: refreshToken, rememberSession });
     return token.save();
   }
 
@@ -133,7 +137,6 @@ export class AuthService {
     try {
       return this.usersService.activateUser(link);
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Ошибка на стороне сервера',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -167,9 +170,12 @@ export class AuthService {
       throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
     }
     const user = await this.usersService.findUserById(userData.id);
-    const tokens = await this.generateUserTokens(user, false);
-    await this.saveToken(user._id, tokens.refreshToken);
-    console.log(tokens);
+
+    console.log(tokenFromDb.rememberSession)
+    const tokens = await this.generateUserTokens(user, tokenFromDb.rememberSession);
+
+    await this.saveToken(user._id, tokens.refreshToken, tokenFromDb.rememberSession);
+    // console.log(tokens);
     return { ...tokens, user };
   }
 

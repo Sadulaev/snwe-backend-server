@@ -12,6 +12,9 @@ export class Token {
 
   @Prop({ required: true, unique: true })
   token: string;
+
+  @Prop({ required: true })
+  rememberSession: boolean;
 }
 
 export const TokenSchema = SchemaFactory.createForClass(Token);

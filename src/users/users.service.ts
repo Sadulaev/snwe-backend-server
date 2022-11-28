@@ -5,6 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 // import { EditUserDto } from './dto/edit-user.dto';
 import { User, UserDocument } from './user.model';
 import * as bcrypt from 'bcryptjs';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class UsersService {

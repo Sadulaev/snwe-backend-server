@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User, UserSchema } from './user.model';
 import { AuthModule } from 'src/auth/auth.module';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [

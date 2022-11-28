@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+// import { Nutrition } from 'src/products/nutrition.model';
+// import { Mixture } from 'src/products/mixture.model';
 
 export type CartDocument = HydratedDocument<Cart>;
 
@@ -10,14 +12,11 @@ export class Cart {
   @Prop({ required: true, unique: true })
   userId: string;
 
-  @Prop()
-  products: string[];
+  @Prop({default: [] })
+  nutritions: string[];
 
-  @Prop()
-  price: number;
-
-  @Prop()
-  discountSum: number;
+  @Prop({default: [] })
+  mixtures: string[];
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
