@@ -70,14 +70,14 @@ export class AuthService {
     }
   }
 
-  async userLogin(loginUserDto: LoginUserDto, rememberUser: boolean) {
+  async userLogin(loginUserDto: LoginUserDto, rememberSession: boolean) {
     const user = await this.validateUser(loginUserDto);
-    const tokens = await this.generateUserTokens(user, rememberUser);
-    await this.saveToken(user._id, tokens.refreshToken, rememberUser);
+    const tokens = await this.generateUserTokens(user, rememberSession);
+    await this.saveToken(user._id, tokens.refreshToken, rememberSession);
     return { ...tokens, user };
   }
 
-  private async generateUserTokens(user: User, rememberUser: boolean) {
+  private async generateUserTokens(user: User, rememberSession: boolean) {
     const payload = {
       id: user._id,
       nickname: user.nickname,
@@ -90,7 +90,7 @@ export class AuthService {
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_KEY,
-      expiresIn: rememberUser ? '21d' : '1d',
+      expiresIn: rememberSession ? '21d' : '1d',
     });
 
     return { accesToken, refreshToken };
@@ -100,6 +100,7 @@ export class AuthService {
     const tokenData = await this.tokenModel.findOne({ userId }).exec();
     if (tokenData) {
       tokenData.token = refreshToken;
+      tokenData.rememberSession = rememberSession;
       return tokenData.save();
     }
     const token = new this.tokenModel({ userId, token: refreshToken, rememberSession });
@@ -171,11 +172,9 @@ export class AuthService {
     }
     const user = await this.usersService.findUserById(userData.id);
 
-    console.log(tokenFromDb.rememberSession)
     const tokens = await this.generateUserTokens(user, tokenFromDb.rememberSession);
 
     await this.saveToken(user._id, tokens.refreshToken, tokenFromDb.rememberSession);
-    // console.log(tokens);
     return { ...tokens, user };
   }
 
@@ -186,7 +185,6 @@ export class AuthService {
       });
       return userData;
     } catch (e) {
-      console.log(e);
       return null;
     }
   }
@@ -198,13 +196,20 @@ export class AuthService {
       });
       return userData;
     } catch (e) {
-      console.log(e);
       return null;
     }
   }
 
   private async findToken(refreshToken) {
     return await this.tokenModel.findOne({ token: refreshToken }).exec();
+  }
+
+  async checkSession(token:string) {
+    const userData = this.jwtService.verify(token, {
+      secret: process.env.JWT_REFRESH_KEY,
+    });
+    const result: Token = await this.tokenModel.findOne({userId: userData.id}).exec()
+    return result.rememberSession;
   }
 
   //Admin's services (Admin have no registration function because of only global admin with accessLvl=0 can create another admin)

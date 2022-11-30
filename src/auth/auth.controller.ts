@@ -27,12 +27,12 @@ export class AuthController {
   @Post('/signin')
   async signIn(
     @Body(new ValidationPipe()) loginUserDto: LoginUserDto,
-    @Headers('memoryUser') memoryUser: string,
+    @Headers('rememberSession') rememberHeader,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const rememberUser: boolean = memoryUser === 'true' ? true : false;
-    const tokens = await this.authService.userLogin(loginUserDto, rememberUser);
-    const tokenLifeTime = (rememberUser ? 21 : 1) * 24 * 60 * 60 * 1000;
+    const rememberSession = rememberHeader === 'true' ? true : false;
+    const tokens = await this.authService.userLogin(loginUserDto, rememberSession);
+    const tokenLifeTime = (rememberSession ? 21 : 1) * 24 * 60 * 60 * 1000;
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,
       httpOnly: true,
@@ -61,12 +61,11 @@ export class AuthController {
   @Get('/refresh')
   async refreshToken(
     @Req() request: Request,
-    // @Headers('memoryUser') memoryUser: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    // const rememberUser: boolean = memoryUser === 'true' ? true : false;
     const { refreshToken } = request.cookies;
     const tokens = await this.authService.refresh(refreshToken);
+    const remeberSession = await this.authService.checkSession(tokens.refreshToken)
     const tokenLifeTime = 1 * 24 * 60 * 60 * 1000;
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,

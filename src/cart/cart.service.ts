@@ -71,9 +71,9 @@ export class CartService {
     }
     for (const mixture of calculatePrice.mixtures) {
       const result = await this.productsService.getMixtureById(mixture._id)
-      if (mixture.count > 4) {
+      if (mixture.count < 4) {
         resultPrice += result.twoWeekPrice;
-      } else if (mixture.count <= 4) {
+      } else if (mixture.count >= 4) {
         resultPrice += result.twoMonthPrice;
       }
     }
