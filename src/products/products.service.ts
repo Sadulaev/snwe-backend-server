@@ -120,13 +120,15 @@ export class ProductsService {
     return await this.mixtureModel.find().exec();
   }
 
-  async searchMixtures(skip: string, counter: string) {
+  async searchMixtures(skip: string | number, counter: string | number) {
+    skip = +skip || 0;
+    counter = +counter || 0;
     const count = (await this.mixtureModel.find().exec()).length;
     const result = await this.mixtureModel
       .find()
-      .skip(+skip || 0)
-      .limit(+counter);
-    const currentCount = +counter + (+skip || 0);
+      .skip(skip)
+      .limit(counter);
+    const currentCount = counter + skip;
     console.log(skip, counter);
     return { data: result, isMore: count > currentCount };
   }
@@ -202,7 +204,7 @@ export class ProductsService {
     name ? (search['title'] = new RegExp('^' + name, 'i')) : '';
     category ? (search['category'] = category) : '';
     from || to
-      ? (search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 100000 })
+      ? (search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 10000000000000 })
       : '';
 
     // console.log(search, skip, counter)

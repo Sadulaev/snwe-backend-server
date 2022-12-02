@@ -63,7 +63,6 @@ export class CartService {
   }
 
   async calculatePrice(calculatePrice: CalculatePrice): Promise<number> {
-    console.log(calculatePrice)
     let resultPrice: number = 0;
     for (const nutrition of calculatePrice.nutritions) {
       const result = await this.productsService.getNutritionById(nutrition._id)

@@ -31,7 +31,6 @@ export class CartController {
     @Post('/calculate')
     async calculateCartPrice(@Body() calculatePrice: CalculatePrice) {
         const resultPrice = await this.cartService.calculatePrice(calculatePrice)
-        console.log('sdflsdlf', resultPrice)
         return resultPrice;
     }
 }

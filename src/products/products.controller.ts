@@ -108,7 +108,7 @@ export class ProductsController {
     @Query('skip') skip: string,
     @Query('counter') counter: string,
   ) {
-    console.log(skip, counter);
+    // console.log(skip, counter);
     return this.productsService.searchMixtures(skip, counter);
   }
 }

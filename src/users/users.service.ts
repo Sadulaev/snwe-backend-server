@@ -42,7 +42,6 @@ export class UsersService {
 
   async updateUserName(id: string, nickname: string) {
     const isUniqueName = await this.findUserByName(nickname);
-    console.log(isUniqueName);
     if (isUniqueName) {
       throw new HttpException(
         'Имя пользователя занято',
@@ -52,7 +51,6 @@ export class UsersService {
     try {
       await this.userModel.findByIdAndUpdate(id, { nickname });
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Ошибка на стороне сервера',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -75,7 +73,6 @@ export class UsersService {
     try {
       await this.userModel.findByIdAndUpdate(id, { email, isActivated: false });
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Ошибка на стороне сервера',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -95,7 +92,6 @@ export class UsersService {
     try {
       await this.userModel.findByIdAndUpdate(id, { number });
     } catch (e) {
-      console.log(e);
       throw new HttpException(
         'Ошибка на стороне сервера',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -131,7 +127,6 @@ export class UsersService {
             password: hashPassword,
           });
         } catch (e) {
-          console.log(e);
           throw new HttpException(
             'Ошибка на стороне сервера',
             HttpStatus.INTERNAL_SERVER_ERROR,
