@@ -37,7 +37,7 @@ export class AdminsController {
   @UseGuards(AccessGuard)
   @Get('/getAdminById/:id')
   async getAdminById(@Param('id') id: string): Promise<Admin> {
-    return this.adminsService.getAdminById(id);
+    return this.adminsService.findAdminById(id);
   }
 
   @Access([0])

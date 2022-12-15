@@ -25,10 +25,12 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private cartService: CartService,
-  ) {}
+  ) { }
 
-  //User registration and authorization with helpers (private...)
+  //User and Admin registration and authorization with helpers (private...)
 
+
+  //User registration-----------------------------------------------------------------------------
   async userRegist(userDto: CreateUserDto) {
     const message = [];
     (await this.usersService.findUserByName(userDto.nickname)) &&
@@ -41,23 +43,27 @@ export class AuthService {
       throw new HttpException(message, HttpStatus.BAD_REQUEST);
     }
 
+    //Password hashing before save into DB
     const hashPassword = await bcrypt.hash(
       userDto.password,
       +process.env.BCRYPT_HASH,
     );
     const activationLink = uuidv4();
 
+    //Creating user using function from users.service.ts
     const result = await this.usersService.createUser({
       ...userDto,
       password: hashPassword,
       activationLink,
     });
 
+    //Sending email to activate account
     await this.mailService.sendUserConfirmation(
       { name: userDto.nickname, email: userDto.email },
       activationLink,
     );
 
+    //Special function from cart.service.ts which return cart if exist, or create if not
     await this.cartService.getCartByUserId(result._id)
 
     if (result) {
@@ -70,20 +76,34 @@ export class AuthService {
     }
   }
 
+  //User login function---------------------------------------------------------------------------------------------------
   async userLogin(loginUserDto: LoginUserDto, rememberSession: boolean) {
     const user = await this.validateUser(loginUserDto);
-    const tokens = await this.generateUserTokens(user, rememberSession);
-    await this.saveToken(user._id, tokens.refreshToken, rememberSession);
-    return { ...tokens, user };
-  }
-
-  private async generateUserTokens(user: User, rememberSession: boolean) {
     const payload = {
       id: user._id,
       nickname: user.nickname,
       banned: user.banned,
     };
+    const tokens = await this.generateTokens(payload, rememberSession);
+    await this.saveToken(user._id, tokens.refreshToken, rememberSession);
+    return { ...tokens, user };
+  }
 
+  //Admin login function====================================================================================================
+  async adminLogin(loginAdminDto: LoginAdminDto, rememberSession: boolean) {
+    const admin = await this.validateAdmin(loginAdminDto);
+    const payload = {
+      id: admin._id,
+      nickname: admin.nickname,
+      accessLvl: admin.accessLvl,
+    };
+    const tokens = await this.generateTokens(payload, rememberSession)
+    await this.saveToken(admin._id, tokens.refreshToken, rememberSession)
+    return { ...tokens, admin };
+  }
+
+  //Generate tokens for users and admins accessToken ~ 1h / refreshToken ~ 1d or 21d------------------------------------------------
+  private async generateTokens(payload: Object, rememberSession: boolean) {
     const accesToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_KEY,
       expiresIn: '1h',
@@ -96,17 +116,19 @@ export class AuthService {
     return { accesToken, refreshToken };
   }
 
-  private async saveToken(userId: string, refreshToken: string, rememberSession: boolean) {
-    const tokenData = await this.tokenModel.findOne({ userId }).exec();
+  // Saving token into DB for users and admins---------------------------------------------------------------------------------
+  private async saveToken(personId: string, refreshToken: string, rememberSession: boolean) {
+    const tokenData = await this.tokenModel.findOne({ personId }).exec();
     if (tokenData) {
       tokenData.token = refreshToken;
       tokenData.rememberSession = rememberSession;
       return tokenData.save();
     }
-    const token = new this.tokenModel({ userId, token: refreshToken, rememberSession });
+    const token = new this.tokenModel({ personId, token: refreshToken, rememberSession });
     return token.save();
   }
 
+  //User validation------------------------------------------------------------------------------------------------------------
   private async validateUser(loginUserDto: LoginUserDto) {
     const email = await this.usersService.findUserByEmail(loginUserDto.login);
     const nickname = await this.usersService.findUserByName(loginUserDto.login);
@@ -132,8 +154,27 @@ export class AuthService {
     }
   }
 
-  //Activate user account
+  //Admin validation-------------------------------------------------------------------------------------
+  private async validateAdmin(loginAdminDto: LoginAdminDto) {
+    const admin = await this.adminsService.getAdminByName(
+      loginAdminDto.nickname,
+    );
+    if (admin) {
+      const checkPassword = await bcrypt.compare(
+        loginAdminDto.password,
+        admin.password,
+      );
+      if (checkPassword) {
+        return admin;
+      } else {
+        throw new HttpException('Неверный логин или пароль', HttpStatus.BAD_REQUEST);
+      }
+    } else {
+      throw new HttpException('Неверный логин или пароль', HttpStatus.BAD_REQUEST);
+    }
+  }
 
+  //Activate user account--------------------------------------------------------------------------------------
   async confirmMail(link: string) {
     try {
       return this.usersService.activateUser(link);
@@ -145,8 +186,7 @@ export class AuthService {
     }
   }
 
-  //LogOut for Users
-
+  //LogOut for Users and Admins-------------------------------------------------------------------------------------
   async logout(token: string) {
     try {
       const result = await this.tokenModel.deleteOne({ token }).exec();
@@ -159,23 +199,40 @@ export class AuthService {
     }
   }
 
-  //Update refresh token for Users
-
+  //Update refresh token for Users and Admins---------------------------------------------------------------------------------------
   async refresh(refreshToken: string) {
+    
     if (!refreshToken) {
       throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
     }
-    const userData = this.validateRefreshToken(refreshToken);
-    const tokenFromDb = await this.findToken(refreshToken);
-    if (!userData || !tokenFromDb) {
+    const personData = this.validateRefreshToken(refreshToken);
+    const tokenFromDb: any = await this.findToken(refreshToken);
+    if (!personData || !tokenFromDb) {
       throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
     }
-    const user = await this.usersService.findUserById(userData.id);
 
-    const tokens = await this.generateUserTokens(user, tokenFromDb.rememberSession);
+    let personInfo: Admin | User
+    let person: {id: string, nickname: string, accessLvl?: number, banned?: boolean}
+    if (personData.admin) {
+      personInfo = await this.adminsService.findAdminById(personData.id)
+      person = {
+        id: personInfo._id,
+        nickname: personInfo.nickname,
+        accessLvl: personInfo.accessLvl,
+      }
+    } else {
+      personInfo = await this.usersService.findUserById(personData.id);
+      person = {
+        id: personInfo._id,
+        nickname: personInfo.nickname,
+        banned: personInfo.banned,
+      };
+    }
 
-    await this.saveToken(user._id, tokens.refreshToken, tokenFromDb.rememberSession);
-    return { ...tokens, user };
+    const tokens = await this.generateTokens(person, tokenFromDb.rememberSession);
+
+    await this.saveToken(person.id, tokens.refreshToken, tokenFromDb.rememberSession);
+    return { ...tokens, personInfo };
   }
 
   private async validateAccessToken(token: string) {
@@ -204,55 +261,11 @@ export class AuthService {
     return await this.tokenModel.findOne({ token: refreshToken }).exec();
   }
 
-  async checkSession(token:string) {
+  async checkSession(token: string) {
     const userData = this.jwtService.verify(token, {
       secret: process.env.JWT_REFRESH_KEY,
     });
-    const result: Token = await this.tokenModel.findOne({userId: userData.id}).exec()
+    const result: Token = await this.tokenModel.findOne({ personId: userData.id }).exec()
     return result.rememberSession;
-  }
-
-  //Admin's services (Admin have no registration function because of only global admin with accessLvl=0 can create another admin)
-
-  async adminLogin(loginAdminDto: LoginAdminDto) {
-    const admin = await this.validateAdmin(loginAdminDto);
-    return this.generateAdminToken(admin);
-  }
-
-  private async generateAdminToken(admin: Admin) {
-    const payload = {
-      id: admin._id,
-      nickname: admin.nickname,
-      accessLvl: admin.accessLvl,
-    };
-    return {
-      token: this.jwtService.sign(payload, {
-        secret: process.env.JWT_SECRET_KEY,
-      }),
-    };
-  }
-
-  private async validateAdmin(loginAdminDto: LoginAdminDto) {
-    const admin = await this.adminsService.getAdminByName(
-      loginAdminDto.nickname,
-    );
-    if (admin.nickname) {
-      const checkPassword = await bcrypt.compare(
-        loginAdminDto.password,
-        admin.password,
-      );
-      if (checkPassword) {
-        return admin;
-      }
-      throw new HttpException(
-        'Неверный логин или пароль',
-        HttpStatus.BAD_REQUEST,
-      );
-    } else {
-      throw new HttpException(
-        'Неверный логин или пароль',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
   }
 }

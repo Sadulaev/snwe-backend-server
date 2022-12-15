@@ -40,6 +40,22 @@ export class AuthController {
     return { accessToken: tokens.accesToken, user: tokens.user };
   }
 
+  @Post('/admin/signin')
+  async AdminSignIn(
+    @Body(new ValidationPipe()) loginAdminDto: LoginAdminDto,
+    @Headers('rememberSession') rememberHeader,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const rememberSession = rememberHeader === 'true' ? true : false;
+    const tokens = await this.authService.adminLogin(loginAdminDto, rememberSession)
+    const tokenLifeTime = (rememberSession ? 21 : 1) * 24 * 60 * 60 * 1000;
+    response.cookie('refreshToken', tokens.refreshToken, {
+      maxAge: tokenLifeTime,
+      httpOnly: true,
+    });
+    return {accessToken: tokens.accesToken, user: tokens.admin}
+  }
+
   @Get('/mail/confirm/:link')
   @Redirect(process.env.CLIENT_URL, 301)
   async confirmAccount(@Param('link') link: string) {
@@ -64,18 +80,15 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const { refreshToken } = request.cookies;
+    console.log(refreshToken)
     const tokens = await this.authService.refresh(refreshToken);
-    const remeberSession = await this.authService.checkSession(tokens.refreshToken)
-    const tokenLifeTime = 1 * 24 * 60 * 60 * 1000;
+    console.log(tokens)
+    const rememberSession = await this.authService.checkSession(tokens.refreshToken)
+    const tokenLifeTime = (rememberSession ? 21 : 1) * 24 * 60 * 60 * 1000;
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,
       httpOnly: true,
     });
-    return { accessToken: tokens.accesToken, user: tokens.user };
-  }
-
-  @Post('/admin/signin')
-  async adminSignIn(@Body(new ValidationPipe()) loginAdminDto: LoginAdminDto) {
-    return this.authService.adminLogin(loginAdminDto);
+    return { accessToken: tokens.accesToken, info: tokens.personInfo };
   }
 }

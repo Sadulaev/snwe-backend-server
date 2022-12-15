@@ -33,17 +33,17 @@ export class AdminsService {
   async removeAdmin(id: string) {
     const result = await this.adminModel.findByIdAndRemove(id);
     if (result) {
-      throw new HttpException('Пользователь удален', HttpStatus.OK);
+      throw new HttpException('Админ удален', HttpStatus.OK);
     } else {
-      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+      throw new HttpException('Админ не найден', HttpStatus.NOT_FOUND);
     }
   }
-  async getAdminById(id: string): Promise<Admin> {
+  async findAdminById(id: string): Promise<Admin> {
     const result = await this.adminModel.findById(id).exec();
     if (result) {
       return result;
     } else {
-      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+      throw new HttpException('Админ не найден', HttpStatus.NOT_FOUND);
     }
   }
   async getAdminByName(nickname: string): Promise<Admin> {

@@ -8,7 +8,7 @@ export class Token {
   _id?: string;
 
   @Prop({ required: true, unique: true })
-  userId: string;
+  personId: string;
 
   @Prop({ required: true, unique: true })
   token: string;

@@ -8,7 +8,7 @@ async function start() {
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: 'http://localhost:8081',
+    origin: 'http://localhost:8081'
   });
   await app.listen(PORT, () => console.log(`Server started on port = ${PORT}`));
 }
