@@ -10,13 +10,13 @@ export class Order {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
     userId: string;
 
-    @Prop({ type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Nutrition'}], default: []})
-    nutritions: string[];
+    @Prop({default: []})
+    nutritions: Object[];
 
-    @Prop({type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Mixture'}], default: []})
-    mixtures: string[];
+    @Prop({default: []})
+    mixtures: Object[];
 
-    @Prop()
+    @Prop({default: []})
     trainPlans: string[]
 
     @Prop({required: true})
@@ -34,7 +34,10 @@ export class Order {
     @Prop()
     closeDate: Date;
 
-    @Prop({default: 'Ожидание оплаты'})
+    @Prop({default: false})
+    isClosed: boolean;
+
+    @Prop({default: 'Обработка заказа'})
     status: string;
 }
 

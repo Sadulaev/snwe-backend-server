@@ -1,6 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Mixture } from 'src/products/mixture.model';
+import { Nutrition } from 'src/products/nutrition.model';
 import { ProductsService } from 'src/products/products.service';
 import { Cart, CartDocument } from './cart.model';
 import { CalculatePrice, CreateCartDto, UpdateCartDto } from './dto/cart.dto';
@@ -17,11 +19,11 @@ export class CartService {
   async getCartByUserId(id: string) {
     const cart = await this.cartModel.findOne({ userId: id });
     if (cart) {
-      let nutritions: Object[] = await Promise.all(cart.nutritions.map(async (nutrition) => {
+      let nutritions: Nutrition[] = await Promise.all(cart.nutritions.map(async (nutrition) => {
         const result = await this.productsService.getNutritionById(nutrition)
         return result;
       }));
-      let mixtures: Object[] = await Promise.all(cart.mixtures.map(async (mixture) => {
+      let mixtures: Mixture[] = await Promise.all(cart.mixtures.map(async (mixture) => {
         const result = await this.productsService.getMixtureById(mixture)
         return result;
       }));
@@ -65,11 +67,11 @@ export class CartService {
   async calculatePrice(calculatePrice: CalculatePrice): Promise<number> {
     let resultPrice: number = 0;
     for (const nutrition of calculatePrice.nutritions) {
-      const result = await this.productsService.getNutritionById(nutrition._id)
+      const result = await this.productsService.getNutritionById(nutrition.id)
       resultPrice += (result.price * nutrition.count)
     }
     for (const mixture of calculatePrice.mixtures) {
-      const result = await this.productsService.getMixtureById(mixture._id)
+      const result = await this.productsService.getMixtureById(mixture.id)
       if (mixture.count < 4) {
         resultPrice += result.twoWeekPrice;
       } else if (mixture.count >= 4) {
@@ -85,7 +87,7 @@ export class CartService {
 
   //helpers
 
-  private async getOrCreateCart(id: string) {
+  async getOrCreateCart(id: string) {
     const cart = await this.cartModel.findOne({ userId: id });
     if (cart) {
       return cart;

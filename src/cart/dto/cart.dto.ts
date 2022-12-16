@@ -13,8 +13,8 @@ export class UpdateCartDto {
   type: 'mixture' | 'nutrition';
 }
 
-export interface Product {
-  _id: string,
+interface Product {
+  id: string,
   count: number,
 }
 
