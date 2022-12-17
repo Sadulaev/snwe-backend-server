@@ -157,7 +157,7 @@ export class AuthService {
   //Admin validation-------------------------------------------------------------------------------------
   private async validateAdmin(loginAdminDto: LoginAdminDto) {
     const admin = await this.adminsService.getAdminByName(
-      loginAdminDto.nickname,
+      loginAdminDto.login,
     );
     if (admin) {
       const checkPassword = await bcrypt.compare(
@@ -201,7 +201,6 @@ export class AuthService {
 
   //Update refresh token for Users and Admins---------------------------------------------------------------------------------------
   async refresh(refreshToken: string) {
-    
     if (!refreshToken) {
       throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
     }
@@ -213,7 +212,7 @@ export class AuthService {
 
     let personInfo: Admin | User
     let person: {id: string, nickname: string, accessLvl?: number, banned?: boolean}
-    if (personData.admin) {
+    if (personData.hasOwnProperty('accessLvl')) {
       personInfo = await this.adminsService.findAdminById(personData.id)
       person = {
         id: personInfo._id,

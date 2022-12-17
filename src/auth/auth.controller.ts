@@ -80,9 +80,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const { refreshToken } = request.cookies;
-    console.log(refreshToken)
     const tokens = await this.authService.refresh(refreshToken);
-    console.log(tokens)
     const rememberSession = await this.authService.checkSession(tokens.refreshToken)
     const tokenLifeTime = (rememberSession ? 21 : 1) * 24 * 60 * 60 * 1000;
     response.cookie('refreshToken', tokens.refreshToken, {

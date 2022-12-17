@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CartService } from 'src/cart/cart.service';
+import { AuthModule } from 'src/auth/auth.module';
+import { CartModule } from 'src/cart/cart.module';
 import { OrderSchema } from './order.model';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
@@ -10,7 +11,8 @@ import { OrdersService } from './orders.service';
   providers: [OrdersService],
   imports: [
     MongooseModule.forFeature([{ name: 'Order', schema: OrderSchema}]),
-    CartService
+    CartModule,
+    AuthModule
   ]
 })
 export class OrdersModule {}
