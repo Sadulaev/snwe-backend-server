@@ -33,7 +33,7 @@ export class AccessGuard implements CanActivate {
 
       if (bearer !== 'Bearer' || !token) {
         throw new UnauthorizedException({
-          message: 'Пользователь не авторизован',
+          message: 'Пользователь не авторизован (некорректный токен)',
         });
       }
 

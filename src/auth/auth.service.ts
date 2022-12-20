@@ -202,12 +202,12 @@ export class AuthService {
   //Update refresh token for Users and Admins---------------------------------------------------------------------------------------
   async refresh(refreshToken: string) {
     if (!refreshToken) {
-      throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Ошибка авторизации (Отсутствует refresh)', HttpStatus.UNAUTHORIZED);
     }
     const personData = this.validateRefreshToken(refreshToken);
     const tokenFromDb: any = await this.findToken(refreshToken);
     if (!personData || !tokenFromDb) {
-      throw new HttpException('Ошибка авторизации', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Ошибка авторизации (некорректыный refresh или не найден токе)', HttpStatus.UNAUTHORIZED);
     }
 
     let personInfo: Admin | User
@@ -257,7 +257,11 @@ export class AuthService {
   }
 
   private async findToken(refreshToken) {
-    return await this.tokenModel.findOne({ token: refreshToken }).exec();
+    try {
+      return await this.tokenModel.findOne({ token: refreshToken }).exec();
+    } catch (e) {
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 
   async checkSession(token: string) {

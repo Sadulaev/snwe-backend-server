@@ -35,21 +35,17 @@ export class CartService {
   }
 
   async addToCart(userId: string, updateCartDto: UpdateCartDto) {
-    try {
-      const cart = await this.getOrCreateCart(userId);
-      if (updateCartDto.type === 'nutrition' && !cart.nutritions.includes(updateCartDto.productId)) {
-        await this.cartModel.updateOne({ userId }, { $push: { nutritions: updateCartDto.productId } })
-        const addedProduct = await this.productsService.getNutritionById(updateCartDto.productId)
-        return addedProduct;
-      } else if (updateCartDto.type === 'mixture' && !cart.nutritions.includes(updateCartDto.productId)) {
-        await this.cartModel.updateOne({ userId }, { $push: { mixtures: updateCartDto.productId } })
-        const addedProduct = await this.productsService.getMixtureById(updateCartDto.productId)
-        return addedProduct
-      }
-      throw new HttpException('Продукт уже в корзине', HttpStatus.BAD_REQUEST)
-    } catch (e) {
-      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    const cart = await this.getOrCreateCart(userId);
+    if (updateCartDto.type === 'nutrition' && !cart.nutritions.includes(updateCartDto.productId)) {
+      await this.cartModel.updateOne({ userId }, { $push: { nutritions: updateCartDto.productId } })
+      const addedProduct = await this.productsService.getNutritionById(updateCartDto.productId)
+      return addedProduct;
+    } else if (updateCartDto.type === 'mixture' && !cart.nutritions.includes(updateCartDto.productId)) {
+      await this.cartModel.updateOne({ userId }, { $push: { mixtures: updateCartDto.productId } })
+      const addedProduct = await this.productsService.getMixtureById(updateCartDto.productId)
+      return addedProduct
     }
+    throw new HttpException('Продукт уже в корзине', HttpStatus.BAD_REQUEST)
   }
 
   async removeFromCart(userId: string, updateCartDto: UpdateCartDto) {
