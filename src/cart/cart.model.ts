@@ -7,7 +7,7 @@ export type CartDocument = HydratedDocument<Cart>;
 export class Cart {
   _id?: string;
 
-  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User' ,required: true, unique: true })
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true })
   userId: string;
 
   @Prop({default: [] })

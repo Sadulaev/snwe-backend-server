@@ -14,11 +14,11 @@ export class UpdateCartDto {
 }
 
 interface Product {
-  id: string,
+  _id: string,
   count: number,
 }
 
 export class CalculatePrice {
-  nutritions?: Product[];
-  mixtures?: Product[];
+  nutritions?: Product[] = [];
+  mixtures?: Product[] = [];
 }

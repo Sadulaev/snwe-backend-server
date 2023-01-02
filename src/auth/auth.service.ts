@@ -97,6 +97,7 @@ export class AuthService {
       nickname: admin.nickname,
       accessLvl: admin.accessLvl,
     };
+    console.log(rememberSession)
     const tokens = await this.generateTokens(payload, rememberSession)
     await this.saveToken(admin._id, tokens.refreshToken, rememberSession)
     return { ...tokens, admin };

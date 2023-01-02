@@ -1,15 +1,50 @@
-import { IsArray, IsBoolean, IsDefined, IsMongoId, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsDefined, IsMongoId, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
 
 interface Product {
-  id: string,
+  _id: string,
   count: number,
 }
 
+class UserAddress {
+  @IsDefined({ message: 'Не указан город' })
+  @IsNotEmpty({ message: 'Не указан город' })
+  city: string;
+
+  @IsDefined({ message: 'Не указана улица' })
+  @IsNotEmpty({ message: 'Не указана улица' })
+  street: string;
+
+  @IsDefined({ message: 'Не указан номер дома' })
+  @IsNotEmpty({ message: 'Не указан номер дома' })
+  house: string;
+
+  @IsDefined({ message: 'Не указан почтовый индекс' })
+  @IsNotEmpty({ message: 'Не указан почтовый индекс' })
+  index: string;
+}
+
+class UserInfo {
+  @IsDefined({ message: 'Не указано имя' })
+  @IsNotEmpty({ message: 'Не указано имя' })
+  name: string;
+
+  @IsDefined({ message: 'Не указана почта' })
+  @IsNotEmpty({ message: 'Не указана почта' })
+  email: string;
+
+  @IsDefined({ message: 'Не указан номер телефона' })
+  @IsNotEmpty({ message: 'Не указан номер телефона' })
+  number: string;
+}
+
 export class CreateOrderDto {
-  @IsDefined({ message: 'Id пользователя отсутствует' })
-  @IsNotEmpty({ message: 'Некорректный Id пользователя' })
-  @IsMongoId({ message: 'Некорректный Id пользователя' })
-  userId: string;
+  userId?: string;
+
+  @IsDefined({message: 'Не указаны данные пользователя'})
+  userInfo: UserInfo;
+
+  @IsDefined({ message: 'Отсутствуют данные о доставке' })
+  userAddress: UserAddress;
 
   @IsArray({ message: 'Неверный тип данных (питание)' })
   nutritions: Product[];
@@ -17,50 +52,12 @@ export class CreateOrderDto {
   @IsArray({ message: 'Неверный тип данных (смеси)' })
   mixtures: Product[];
 
-  @IsArray({ message: 'Неверный тип данных (планы тренировок)' })
-  trainPlans: string[];
+  // @IsArray({ message: 'Неверный тип данных (планы тренировок)' })
+  trainPlans?: string[];
 
-  price?: number;
+  total?: number;
 
   @IsDefined({ message: 'Не указан тип доставки' })
   @IsBoolean({ message: 'Неверный тип данных (доставка)' })
   isDelivery: boolean;
-
-  @IsDefined({ message: 'Отсутствуют данные о доставке' })
-  @IsString({ message: 'Неверный тип данных (адрес доставки)' })
-  address: string | null;
 }
-
-// export class CreateOrderWithOneDto {
-//   @IsDefined({ message: 'Id пользователя отсутствует' })
-//   @IsNotEmpty({ message: 'Некорректный Id пользователя' })
-//   @IsMongoId({ message: 'Некорректный Id пользователя' })
-//   userId: string;
-
-//   @IsDefined({ message: 'Информация о продукте некорректна' })
-//   product: { productId: string, type: string }
-
-//   // @IsArray({message: 'Неверный тип данных (питание)'})
-//   // nutritions: string[];
-
-//   // @IsArray({message: 'Неверный тип данных (смеси)'})
-//   // mixtures: string[];
-
-//   // @IsArray({message: 'Неверный тип данных (планы тренировок)'})
-//   // trainPlans: string[];
-
-//   // @IsDefined({message: 'Отсутствует итоговая цена заказа'})
-//   // @IsNumber(
-//   //     { allowNaN: false, allowInfinity: false },
-//   //     { message: 'Некорректное значение цены' },
-//   //   )
-//   // price: number;
-
-//   @IsDefined({ message: 'Не указан тип доставки' })
-//   @IsBoolean({ message: 'Неверный тип данных (доставка)' })
-//   isDelivery: boolean;
-
-//   @IsDefined({ message: 'Отсутствуют данные о доставке' })
-//   @IsString({ message: 'Неверный тип данных (адрес доставки)' })
-//   address: string | null;
-// }

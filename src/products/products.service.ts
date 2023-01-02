@@ -109,10 +109,24 @@ export class ProductsService {
 
   async getMixtureById(id: string): Promise<Mixture> {
     const responce = await this.mixtureModel.findById(id).exec();
+    console.log(responce)
     if (!responce) {
       throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND);
     } else {
       return responce;
+    }
+  }
+
+  
+  async getMixturesArrayById(mixtures: string[]) {
+    try {
+      const result = [];
+      for(let mixture of mixtures) {
+        result.push(await this.mixtureModel.findById(mixture))
+      }
+    } catch(e) {
+      console.log(e)
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
@@ -130,7 +144,7 @@ export class ProductsService {
       .limit(counter);
     const currentCount = counter + skip;
     console.log(skip, counter);
-    return { data: result, isMore: count > currentCount };
+    return { data: result, isMore: count >= currentCount };
   }
 
   async createNutrition(
@@ -185,6 +199,19 @@ export class ProductsService {
       throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
     } else {
       return responce;
+    }
+  }
+
+  async getNutritionArrayById(nutritions: string[]) {
+    console.log(nutritions)
+    try {
+      const result = [];
+      for(let nutrition of nutritions) {
+        result.push(await this.nutritionModel.findById(nutrition))
+      }
+    } catch(e) {
+      console.log(e)
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 

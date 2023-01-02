@@ -62,12 +62,13 @@ export class CartService {
 
   async calculatePrice(calculatePrice: CalculatePrice): Promise<number> {
     let resultPrice: number = 0;
+    console.log('calc:', calculatePrice)
     for (const nutrition of calculatePrice.nutritions) {
-      const result = await this.productsService.getNutritionById(nutrition.id)
+      const result = await this.productsService.getNutritionById(nutrition._id)
       resultPrice += (result.price * nutrition.count)
     }
     for (const mixture of calculatePrice.mixtures) {
-      const result = await this.productsService.getMixtureById(mixture.id)
+      const result = await this.productsService.getMixtureById(mixture._id)
       if (mixture.count < 4) {
         resultPrice += result.twoWeekPrice;
       } else if (mixture.count >= 4) {

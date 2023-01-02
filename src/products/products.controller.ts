@@ -54,6 +54,12 @@ export class ProductsController {
     return this.productsService.getNutritionById(id);
   }
 
+  @Get('/nutrition/getArrayById')
+  async getNutritionArrayById(@Body() nutritions: string[]) {
+    console.log(nutritions)
+    return this.productsService.getNutritionArrayById(nutritions)
+  }
+
   @Get('/nutrition/getAll')
   async getAllNutritions() {
     return this.productsService.getAllNutritions();
@@ -96,6 +102,11 @@ export class ProductsController {
   @Get('/mixture/getById/:id')
   async getMixtureById(@Param('id') id: string) {
     return this.productsService.getMixtureById(id);
+  }
+
+  @Get('/mixture/getArrayById')
+  async getMixturesArrayById(@Body() mixtures: string[]) {
+    return this.productsService.getMixturesArrayById(mixtures)
   }
 
   @Get('/mixture/getAll')

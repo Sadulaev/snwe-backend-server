@@ -8,37 +8,40 @@ export class Order {
     id?: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-    userId: string;
+    userId: mongoose.Schema.Types.ObjectId;
 
-    @Prop({default: []})
-    nutritions: Object[];
+    @Prop({type: Object,required: true})
+    userInfo: Object;
 
-    @Prop({default: []})
-    mixtures: Object[];
-
-    @Prop({default: []})
-    trainPlans: string[]
-
-    @Prop({required: true})
-    price: number;
-
-    @Prop({required: true})
+    @Prop({type: Boolean, required: true })
     isDelivery: string;
 
-    @Prop({required: true, default: null})
-    address: string | null
+    @Prop({type: Object, required: true, default: null })
+    userAddress: Object | null
 
-    @Prop({default: new Date()})
+    @Prop({type: Object, ref: 'Nutrition', default: [] })
+    nutritions: Object;
+
+    @Prop({type: Object, ref: 'Mixture', default: [] })
+    mixtures: Object;
+
+    @Prop({ default: [] })
+    trainPlans: string[];
+
+    @Prop({ required: true })
+    total: number;
+
+    @Prop({ default: new Date() })
     openDate: Date;
 
     @Prop()
     closeDate: Date;
 
-    @Prop({default: false})
-    isClosed: boolean;
-
-    @Prop({default: 'Обработка заказа'})
+    @Prop({type: String, default: 'PENDING', enum: ['PENDING', 'INPROGRESS', 'INTHEWAY', 'WAITING', 'ACCEPTING', 'COMPLETED', 'FAILED']})
     status: string;
+
+    @Prop({type: Boolean, default: false })
+    isClosed: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order)
