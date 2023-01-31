@@ -33,4 +33,11 @@ export class CartController {
         const resultPrice = await this.cartService.calculatePrice(calculatePrice)
         return resultPrice;
     }
+    
+    @UseGuards(JwtAuthGuard)
+    @Post('/clear')
+    async clearCart(@Req() req) {
+        console.log(req.user.id)
+        return await this.cartService.clearCart(req.user.id)
+    }
 }

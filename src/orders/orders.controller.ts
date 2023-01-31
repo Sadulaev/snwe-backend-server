@@ -2,6 +2,8 @@ import { Controller } from '@nestjs/common';
 import { Body, Get, Param, Post, Put, Req, UseGuards, Query } from '@nestjs/common/decorators';
 import { ValidationPipe } from '@nestjs/common/pipes';
 import { skip } from 'rxjs';
+import { Access } from 'src/auth/access.decorator';
+import { AccessGuard } from 'src/auth/access.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateOrderDto } from './dto/order.dto';
 import { Order } from './order.model';
@@ -32,12 +34,12 @@ export class OrdersController {
 
     @Get('/actuals')
     async getActualOrders() {
-        const pending = await this.orderService.getPendingOrders();
-        const inProgress = await this.orderService.getInProgressOrders();
-        const sended = await this.orderService.getSendedOrders();
-        const waiting = await this.orderService.getUserWaitingOrders();
-        const accepting = await this.orderService.getAcceptingOrders();
-        return {pending, inProgress, sended, waiting, accepting}
+        const PENDING = await this.orderService.getPendingOrders();
+        const INPROGRESS = await this.orderService.getInProgressOrders();
+        const SENDED = await this.orderService.getSendedOrders();
+        const WAITING = await this.orderService.getUserWaitingOrders();
+        const ACCEPTING = await this.orderService.getAcceptingOrders();
+        return {PENDING, INPROGRESS, SENDED, WAITING, ACCEPTING}
     }
 
     @Get('/completed')
@@ -56,25 +58,10 @@ export class OrdersController {
         return await this.orderService.getFailedOrders(+skip, +counter);
     }
 
-
-    //Updating orders-------------------------------------------------------------------------------------
-    @Put('/handleInProgress')
-    async handleInProgress(@Param('orderId') orderId: string): Promise<Order> {
-        return await this.orderService.handleInProgress(orderId);
-    }
-
-    @Put('/handleSend')
-    async handleSend(@Param('orderId') orderId: string): Promise<Order> {
-        return await this.orderService.handleSend(orderId);
-    }
-
-    @Put('/handleComplete')
-    async handleComplete(@Param('orderId') orderId: string) {
-        return await this.orderService.handleCompleted(orderId)
-    }
-
-    @Put('/handleFailed')
-    async handleFailed(@Param('orderId') orderId: string): Promise<Order> {
-        return await this.orderService.handleFailed(orderId);
+    // Updating order status...
+    @Put('/nextStep')
+    async handleNextStep(@Body('orderId') orderId: string) {
+        console.log('Order id:', orderId)
+        return await this.orderService.handleNextStep(orderId);
     }
 }

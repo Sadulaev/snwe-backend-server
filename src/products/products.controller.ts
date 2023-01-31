@@ -31,7 +31,7 @@ export class ProductsController {
 
   @Get('/category/getAll')
   async getAllCategories() {
-    return this.productsService.getAllCategories();
+    return this.productsService.getAllCategories(); 
   }
 
   @Post('/nutrition/create')

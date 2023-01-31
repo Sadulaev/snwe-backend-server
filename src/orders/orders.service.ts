@@ -8,6 +8,10 @@ import { CreateOrderDto } from './dto/order.dto';
 import { OrderGateway } from './order.gateway';
 import { Order, OrderDocument } from './order.model';
 
+type orderStatus = 'PENDING' | 'INPROGRESS' | 'WAITING' | 'INTHEWAY'
+const deliveryStatusSteps = ['PENDING', 'INPROGRESS', 'INTHEWAY', 'COMPLETED']
+const noDeliveryStatusSteps = ['PENDING', 'INPROGRESS', 'SENDED', 'WAITING', 'COMPLETED']
+
 @Injectable()
 export class OrdersService {
     constructor(@InjectModel(Order.name) private orderModel: Model<OrderDocument>, private cartService: CartService, private orderGateway: OrderGateway) {}
@@ -18,12 +22,13 @@ export class OrdersService {
         }
         //Вычисление цены
         createOrderDto.total = await this.cartService.calculatePrice({nutritions: createOrderDto.nutritions, mixtures: createOrderDto.mixtures})
-        console.log(createOrderDto.total)
         const result = await new this.orderModel(createOrderDto).save()
         if(!result) {
             throw new HttpException('Ошибка создания заказа. Пожалуйста попрубуйте позже', HttpStatus.INTERNAL_SERVER_ERROR)
         }
+
         this.orderGateway.handleCreateOrder(result)
+        this.cartService.clearCart(createOrderDto.userId)
         throw new HttpException('Заказ был оформлен. За статусом заказа вы можете следить в личном кабинете', HttpStatus.CREATED)
     }
 
@@ -37,11 +42,11 @@ export class OrdersService {
     }
 
     async getInProgressOrders(): Promise<Order[]> {
-        return await this.orderModel.find({status: "IN PROGRESS"}).exec()
+        return await this.orderModel.find({status: "INPROGRESS"}).exec()
     }
 
     async getSendedOrders(): Promise<Order[]> {
-        return await this.orderModel.find({status: "IN THE WAY"}).exec()
+        return await this.orderModel.find({status: "INTHEWAY"}).exec()
     }
 
     async getUserWaitingOrders(): Promise<Order[]> {
@@ -54,55 +59,40 @@ export class OrdersService {
 
     async getCompletedOrders(skip: number, counter: number) {
         const count = (await this.orderModel.find({status: "COMPLETED"}).exec()).length;
-        const result = await this.orderModel.find({status: "COMPLETED"}).skip(skip).limit(counter)
+        const orders = await this.orderModel.find({status: "COMPLETED"}).skip(skip).limit(counter)
         const currentCount = skip + counter;
-        return {result, isMore: currentCount <= count}
+        return {orders, isMore: currentCount <= count}
     }
 
     async getFailedOrders(skip: number, counter: number) {
         const count = (await this.orderModel.find({status: "FAILED"}).exec()).length;
-        const result = await this.orderModel.find({status: "FAILED"}).skip(skip).limit(counter)
+        const orders = await this.orderModel.find({status: "FAILED"}).skip(skip).limit(counter)
         const currentCount = skip + counter;
-        return {result, isMore: currentCount <= count}
+        return {orders, isMore: currentCount <= count}
     }
 
-
-    //Order each step status----------------------------------------------------------------------------------------------------------------------------------------------
-    async handleInProgress(orderId: string) {
+    //Order status updating...
+    async handleNextStep(orderId: string) {
         const order: Order = await this.orderModel.findOne({_id: orderId, isClosed: false})
-        if(!order) {
-            throw new HttpException('Заказ не найден', HttpStatus.NOT_FOUND)
-        } else {
-            return await this.orderModel.findByIdAndUpdate(orderId, {status: 'IN PROGRESS'})
+        console.log(order)
+        const updatedInfo: Object = {
+            status: order.isDelivery ? deliveryStatusSteps[deliveryStatusSteps.indexOf(order.status) + 1] : noDeliveryStatusSteps[noDeliveryStatusSteps.indexOf(order.status) + 1],
+            isClosed: order.status === 'INTHEWAY' || order.status === 'WAITING' ? true : false,
+            closeDate: new Date(),
         }
-    }
-
-    async handleSend(orderId: string) {
-        const order: Order = await this.orderModel.findOne({_id: orderId, isClosed: false})
+        console.log(updatedInfo)
         if(!order) {
-            throw new HttpException('Заказ не найден', HttpStatus.NOT_FOUND)
-        } else if(!order.isDelivery) {
-            return await this.orderModel.findByIdAndUpdate(orderId, {status: 'WAITING'})
+            throw new HttpException('Заказ не найден или уже обработан другим админом', HttpStatus.NOT_FOUND)
+        } else if(order.isClosed === true) {
+            throw new HttpException('Заказ был завершен ' + order.closeDate, HttpStatus.NOT_FOUND)
         } else {
-            return await this.orderModel.findByIdAndUpdate(orderId, {status: 'IN THE WAY'})
-        }
-    }
-
-    async handleCompleted(orderId: string) {
-        const order: Order = await this.orderModel.findOne({_id: orderId, isClosed: false})
-        if(!order) {
-            throw new HttpException('Заказ не найден', HttpStatus.NOT_FOUND)
-        } else {
-            return await this.orderModel.findByIdAndUpdate(orderId, {status: 'COMPLETED', isClosed: true, closeDate: new Date()})
-        }
-    }
-
-    async handleFailed(orderId: string) {
-        const order: Order = await this.orderModel.findOne({_id: orderId, isClosed: false})
-        if(!order) {
-            throw new HttpException('Заказ не найден', HttpStatus.NOT_FOUND)
-        } else {
-            return await this.orderModel.findByIdAndUpdate(orderId, {status: 'FAILED', isClosed: true, closeDate: new Date()})
+            const updatedOrder = await this.orderModel.findByIdAndUpdate(orderId, updatedInfo)
+            if(!updatedOrder) {
+                throw new HttpException('Ошибка обновления заказа', HttpStatus.INTERNAL_SERVER_ERROR)
+            } else {
+                this.orderGateway.handleUpdateOrder(updatedOrder)
+                throw new HttpException('Заказ был обновлен', HttpStatus.OK)
+            }
         }
     }
 }
