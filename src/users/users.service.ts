@@ -9,15 +9,19 @@ import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAll(count:number, page:number) {
+    const skipFrom = (page - 1) * count;
+    console.log(skipFrom) 
+    const users = await this.userModel.find().skip(skipFrom).limit(count)
+    const pages = Math.ceil((await this.userModel.countDocuments()) / count)
+    return {users, pages}
   }
 
   async findUserById(id: string): Promise<User> {
@@ -152,6 +156,43 @@ export class UsersService {
         'Ошибка подтверждения почтового адреса',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  // Now user online
+  async onlineUser(id: string, socketId: string) {
+    try {
+      const result = await this.userModel.findByIdAndUpdate(id, {
+        socketId
+      })
+      return result;
+    } catch (e) {
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  //Now user offline
+  async offlineUser(socketId: string) {
+    try {
+      const result = await this.userModel.updateOne({ socketId }, {
+        socketId: null
+      })
+      return result;
+    } catch (e) {
+      console.log(e)
+      return null;
+      // throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  //Get online users
+  async getOnlineUsers() {
+    const onlineUsers = await this.userModel.find({ socketId: { $ne: null } }).count()
+    if(onlineUsers) {
+      console.log(onlineUsers);
+      return {onlineUsers};
+    } else {
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 }

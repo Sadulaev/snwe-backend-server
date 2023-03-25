@@ -7,7 +7,7 @@ export type MixtureDocument = HydratedDocument<Mixture>;
 export class Mixture {
   _id?: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: '' })
   image: string;
 
   @Prop({ required: true, unique: true })

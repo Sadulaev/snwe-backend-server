@@ -11,13 +11,13 @@ import { OrdersService } from './orders.service';
 
 @Controller('order')
 export class OrdersController {
-    constructor(private orderService: OrdersService) {}
+    constructor(private orderService: OrdersService) { }
 
     //Order creating-----------------------------------------------------------------------------------------------------
     @UseGuards(JwtAuthGuard)
     @Post('/create')
     async createOrder(@Req() req, @Body(new ValidationPipe()) createOrderDto: CreateOrderDto): Promise<Order> {
-        return await this.orderService.createOrder({userId: req.user.id, ...createOrderDto})
+        return await this.orderService.createOrder({ userId: req.user.id, ...createOrderDto })
     }
 
     //Get orders----------------------------------------------------------------------------------------------------------
@@ -32,17 +32,17 @@ export class OrdersController {
         return await this.orderService.getAllOrders();
     }
 
-    @Get('/actuals')
+    @Post('/actuals')
     async getActualOrders() {
         const PENDING = await this.orderService.getPendingOrders();
         const INPROGRESS = await this.orderService.getInProgressOrders();
         const SENDED = await this.orderService.getSendedOrders();
         const WAITING = await this.orderService.getUserWaitingOrders();
         const ACCEPTING = await this.orderService.getAcceptingOrders();
-        return {PENDING, INPROGRESS, SENDED, WAITING, ACCEPTING}
+        return { PENDING, INPROGRESS, SENDED, WAITING, ACCEPTING }
     }
 
-    @Get('/completed')
+    @Post('/completed')
     async getCompletedOrders(
         @Query('skip') skip,
         @Query('counter') counter
@@ -63,5 +63,17 @@ export class OrdersController {
     async handleNextStep(@Body('orderId') orderId: string) {
         console.log('Order id:', orderId)
         return await this.orderService.handleNextStep(orderId);
+    }
+
+    //Get Orders by user Id...
+    @Post('/getByUserId/:id')
+    async getOrdersByUserId(@Param('id') id: string) {
+        return this.orderService.getOrdersByUserId(id)
+    }
+
+    //Get Orders by user Id...
+    @Post('/getOrdersHistory/:id')
+    async getOrdersHistory(@Param('id') id: string) {
+        return this.orderService.getOrdersHistory(id)
     }
 }

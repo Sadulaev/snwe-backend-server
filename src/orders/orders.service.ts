@@ -95,4 +95,26 @@ export class OrdersService {
             }
         }
     }
+
+    //Get orders by user id...
+    async getOrdersByUserId(userId: string) {
+        const orders: Order[] = await this.orderModel.find({userId, isClosed: false})
+        console.log(orders)
+        if(orders) {
+            return orders
+        } else {
+            throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    //Get orders by user id...
+    async getOrdersHistory(userId: string) {
+        const orders: Order[] = await this.orderModel.find({userId, isClosed: true})
+        console.log(orders)
+        if(orders) {
+            return orders
+        } else {
+            throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 }

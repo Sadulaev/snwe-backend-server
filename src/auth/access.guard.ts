@@ -40,11 +40,9 @@ export class AccessGuard implements CanActivate {
       const admin = this.jwtService.verify(token, {
         secret: process.env.JWT_ACCESS_KEY,
       });
-      console.log(admin);
       req.admin = admin;
       return requiredAccessLvl.includes(admin.accessLvl);
     } catch (e) {
-      console.log(e);
       throw new HttpException('Нет доступа', HttpStatus.FORBIDDEN);
     }
   }

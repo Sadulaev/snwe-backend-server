@@ -19,9 +19,9 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  // @Prop({ default: [] })
-  // favorite: string[];
-
+  @Prop({ default: null})
+  socketId: string | null;
+  
   @Prop({ default: false })
   isActivated: boolean;
 

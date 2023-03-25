@@ -52,4 +52,9 @@ export class AdminsService {
   async getAllAdmins(): Promise<Admin[]> {
     return this.adminModel.find().exec();
   }
+
+  //For chat
+  async getBossAdmin(): Promise<Admin> {
+    return this.adminModel.findOne({accessLvl: 0})
+  }
 }

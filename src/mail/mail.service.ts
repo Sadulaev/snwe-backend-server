@@ -8,20 +8,21 @@ export class MailService {
 
   async sendUserConfirmation(user: userConfirm, link: string) {
     const url = `${process.env.API_URL}/users/mail/confirm/${link}`;
-    console.log(user.email);
+    // console.log(url)
+    // console.log(user.email);
     try {
       await this.mailerService.sendMail({
         from: process.env.SMTP_USER,
         to: user.email,
         subject: 'Welcome to Super Nutrition! Confirm your Email',
-        template: './confirmation',
+        template: './confirmation.hbs',
         context: {
           name: user.name,
           url,
         },
       });
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   }
 }

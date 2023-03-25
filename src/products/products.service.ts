@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { FilesService } from 'src/files/files.service';
 import { Category, CategoryDocument } from './category.model';
 import { CreateCategoryDto, EditCategoryDto } from './dto/category.dto';
 import { CreateMixtureDto, EditMixtureDto } from './dto/mixture.dto';
@@ -15,7 +16,8 @@ export class ProductsService {
     @InjectModel(Nutrition.name)
     private nutritionModel: Model<NutritionDocument>,
     @InjectModel(Mixture.name) private mixtureModel: Model<MixtureDocument>,
-  ) {}
+    private fileService: FilesService,
+  ) { }
 
   async createCategory(createCategoryDto: CreateCategoryDto) {
     const isUnique = await this.categoryModel
@@ -27,11 +29,7 @@ export class ProductsService {
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      new this.categoryModel(createCategoryDto).save();
-      throw new HttpException(
-        'Данные были успешно добавлены',
-        HttpStatus.CREATED,
-      );
+      return await new this.categoryModel(createCategoryDto).save();
     }
   }
 
@@ -57,53 +55,65 @@ export class ProductsService {
     }
   }
 
-  async getCategoryById(id: string): Promise<Category> {
-    const responce = await this.categoryModel.findById(id).exec();
-    if (!responce) {
-      throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND);
-    } else {
-      return responce;
-    }
+  async deleteCategory(id) {
+    return await this.categoryModel.findByIdAndDelete(id).exec()
   }
 
   async getAllCategories(): Promise<Category[]> {
     return await this.categoryModel.find().exec();
   }
 
-  async createMixture(createMixtureDto: CreateMixtureDto) {
+  async createMixture(
+    createMixtureDto: CreateMixtureDto,
+  ): Promise<Mixture> {
+    console.log(createMixtureDto)
     const isUnique = await this.mixtureModel
       .findOne({ title: createMixtureDto.title })
       .exec();
     if (isUnique) {
       throw new HttpException(
-        'Смесь с таким названием уже сущетсвует',
+        'Питание с таким названием уже сущетсвует',
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      new this.mixtureModel(createMixtureDto).save();
-      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
+      try {
+        return await new this.mixtureModel(createMixtureDto).save();
+      } catch (e) {
+        console.log(e)
+        throw new HttpException(
+          'Ошибка на стороне сервера',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
   async editMixture(id: string, updatedData: EditMixtureDto) {
+    try {
+      const isUnique = await this.mixtureModel.find({
+        title: updatedData.title
+      })
     if (updatedData.title) {
-      const isUnique = await this.mixtureModel.findOne({
-        title: updatedData.title,
-      });
-      if (isUnique) {
+      if (isUnique.length > 1) {
         throw new HttpException(
           'Название смеси не может повторяться',
           HttpStatus.BAD_REQUEST,
         );
       }
     }
-    const result = await this.mixtureModel
-      .findByIdAndUpdate(id, { ...updatedData })
-      .exec();
-    if (result) {
-      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
-    } else {
-      throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND);
+    if (isUnique[0]?.image && updatedData?.image !== isUnique[0].image) {
+      this.fileService.deleteFile(isUnique[0].image)
+    }
+  } catch (e) {
+    console.log(e)
+    throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+  }
+    try {
+      return await this.mixtureModel
+        .findByIdAndUpdate(id, { ...updatedData, }, { new: true })
+        .exec();
+    } catch (e) {
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -117,14 +127,14 @@ export class ProductsService {
     }
   }
 
-  
+
   async getMixturesArrayById(mixtures: string[]) {
     try {
       const result = [];
-      for(let mixture of mixtures) {
+      for (let mixture of mixtures) {
         result.push(await this.mixtureModel.findById(mixture))
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e)
       throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -159,10 +169,10 @@ export class ProductsService {
         HttpStatus.BAD_REQUEST,
       );
     } else {
-      const newNut = await new this.nutritionModel(createNutritionDto).save();
-      if (newNut) {
-        throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
-      } else {
+      try {
+        return await new this.nutritionModel(createNutritionDto).save();
+      } catch (e) {
+        console.log(e)
         throw new HttpException(
           'Ошибка на стороне сервера',
           HttpStatus.INTERNAL_SERVER_ERROR,
@@ -172,76 +182,128 @@ export class ProductsService {
   }
 
   async editNutrition(id: string, updatedData: EditNutritionDto) {
-    if (updatedData.title) {
-      const isUnique = await this.nutritionModel.findOne({
-        title: updatedData.title,
-      });
-      if (isUnique) {
-        throw new HttpException(
-          'Название питания не может повторяться',
-          HttpStatus.BAD_REQUEST,
-        );
+      try {
+        const isUnique = await this.nutritionModel.find({
+          title: updatedData.title
+        })
+      if (updatedData.title) {
+        if (isUnique.length > 1) {
+          throw new HttpException(
+            'Название питания не может повторяться',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+      if (isUnique[0].image && updatedData.image !== isUnique[0].image) {
+        this.fileService.deleteFile(isUnique[0].image)
+      }
+    } catch (e) {
+      console.log(e)
+      throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+    }
+      try {
+        return await this.nutritionModel
+          .findByIdAndUpdate(id, { ...updatedData, }, { new: true })
+          .exec();
+      } catch (e) {
+        throw new HttpException('Ошмбка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
-    const result = await this.nutritionModel
-      .findByIdAndUpdate(id, { ...updatedData })
-      .exec();
-    if (result) {
-      throw new HttpException('Данные были успешно добавлены', HttpStatus.OK);
-    } else {
-      throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
-    }
-  }
 
   async getNutritionById(id: string) {
-    const responce = await this.nutritionModel.findById(id).exec();
-    if (!responce) {
-      throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
-    } else {
-      return responce;
+      const responce = await this.nutritionModel.findById(id).exec();
+      if (!responce) {
+        throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
+      } else {
+        return responce;
+      }
     }
-  }
 
   async getNutritionArrayById(nutritions: string[]) {
-    console.log(nutritions)
-    try {
-      const result = [];
-      for(let nutrition of nutritions) {
-        result.push(await this.nutritionModel.findById(nutrition))
+      console.log(nutritions)
+      try {
+        const result = [];
+        for (let nutrition of nutritions) {
+          result.push(await this.nutritionModel.findById(nutrition))
+        }
+      } catch (e) {
+        console.log(e)
+        throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
       }
-    } catch(e) {
-      console.log(e)
-      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+  async getAllNutritions(): Promise < Nutrition[] > {
+      return await this.nutritionModel.find().exec();
+    }
+
+  async searchNutritions(
+      name: string | null,
+      category: string | null,
+      from: string,
+      to: string,
+      skip: string,
+      counter: string,
+    ) {
+      const search = {};
+      name ? (search['title'] = new RegExp('^' + name, 'i')) : '';
+      category ? (search['category'] = category) : '';
+      from || to
+        ? (search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 10000000000000 })
+        : '';
+
+      // console.log(search, skip, counter)
+      const count = (await this.nutritionModel.find(search).exec()).length;
+      const result = await this.nutritionModel
+        .find(search)
+        .skip(+skip)
+        .limit(+counter)
+        .exec();
+      const currentCount = +counter + (+skip || 0);
+      return { data: result, isMore: count > currentCount };
+    }
+
+  async getProductsByParams(count: number, page: number, type: string) {
+      const skipFrom = (page - 1) * count;
+      try {
+        if (type === 'NUTRITIONS') {
+          const result = await this.nutritionModel.find().skip(skipFrom).limit(count)
+          const pages = Math.ceil((await this.nutritionModel.countDocuments()) / count)
+          return { NUTRITIONS: result, pagesCount: pages }
+        } else if (type === 'MIXTURES') {
+          const result = await this.mixtureModel.find().skip(skipFrom).limit(count)
+          const pages = Math.ceil((await this.mixtureModel.countDocuments()) / count)
+          return { MIXTURES: result, pagesCount: pages }
+        }
+      } catch (e) {
+        throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+      }
+    }
+
+  async deleteProduct(id: string, type: string) {
+      console.log(id, type)
+      if (type === 'NUTRITIONS') {
+        try {
+          const result = await this.nutritionModel.findById(id)
+          console.log(result)
+          if(result.image) this.fileService.deleteFile(result.image)
+          await this.nutritionModel.findByIdAndDelete(id).exec()
+        } catch (e) {
+          console.log(e)
+          throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+        throw new HttpException('Успешно удалено', HttpStatus.OK)
+      } else if (type === 'MIXTURES') {
+        try {
+          const result = await this.mixtureModel.findById(id)
+          console.log(result)
+          if(result.image) this.fileService.deleteFile(result.image)
+          await this.mixtureModel.findByIdAndDelete(id).exec()
+        } catch (e) {
+          console.log(e)
+          throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+        throw new HttpException('Успешно удалено', HttpStatus.OK)
+      }
     }
   }
 
-  async getAllNutritions(): Promise<Nutrition[]> {
-    return await this.nutritionModel.find().exec();
-  }
-
-  async searchNutritions(
-    name: string | null,
-    category: string | null,
-    from: string,
-    to: string,
-    skip: string,
-    counter: string,
-  ) {
-    const search = {};
-    name ? (search['title'] = new RegExp('^' + name, 'i')) : '';
-    category ? (search['category'] = category) : '';
-    from || to
-      ? (search['price'] = { $gt: +from - 1 || 0, $lt: +to + 1 || 10000000000000 })
-      : '';
-
-    // console.log(search, skip, counter)
-    const count = (await this.nutritionModel.find(search).exec()).length;
-    const result = await this.nutritionModel
-      .find(search)
-      .skip(+skip)
-      .limit(+counter)
-      .exec();
-    const currentCount = +counter + (+skip || 0);
-    return { data: result, isMore: count > currentCount };
-  }
-}

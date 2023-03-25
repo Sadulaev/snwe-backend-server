@@ -32,9 +32,11 @@ export class UsersController {
 
   @Access([0, 1])
   @UseGuards(AccessGuard)
-  @Get('/getAll')
-  async findAllUsers(): Promise<User[]> {
-    return this.usersService.findAll();
+  @Post('/all')
+  async findAllUsers(@Body() data: {count: number, page: number}) {
+    const COUNT = data.count;
+    const PAGE = data.page;
+    return this.usersService.findAll(COUNT, PAGE);
   }
 
   @UseGuards(JwtAuthGuard)

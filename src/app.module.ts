@@ -8,9 +8,20 @@ import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { MailModule } from './mail/mail.module';
 import { OrdersModule } from './orders/orders.module';
+import { ChatModule } from './chat/chat.module';
+
+//files
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'static'),
+      exclude: ['/api/(.*)'],
+    }),
     ConfigModule.forRoot({
       envFilePath: `${process.env.NODE_ENV}.env`,
     }),
@@ -22,6 +33,8 @@ import { OrdersModule } from './orders/orders.module';
     CartModule,
     MailModule,
     OrdersModule,
+    ChatModule,
+    FilesModule,
   ],
 })
 export class AppModule {}

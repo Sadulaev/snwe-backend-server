@@ -58,10 +58,10 @@ export class AuthService {
     });
 
     //Sending email to activate account
-    await this.mailService.sendUserConfirmation(
-      { name: userDto.nickname, email: userDto.email },
-      activationLink,
-    );
+    // await this.mailService.sendUserConfirmation(
+    //   { name: userDto.nickname, email: userDto.email },
+    //   activationLink,
+    // );
 
     //Special function from cart.service.ts which return cart if exist, or create if not
     await this.cartService.getCartByUserId(result._id)
@@ -75,7 +75,6 @@ export class AuthService {
       );
     }
   }
-
   //User login function---------------------------------------------------------------------------------------------------
   async userLogin(loginUserDto: LoginUserDto, rememberSession: boolean) {
     const user = await this.validateUser(loginUserDto);
@@ -97,7 +96,6 @@ export class AuthService {
       nickname: admin.nickname,
       accessLvl: admin.accessLvl,
     };
-    console.log(rememberSession)
     const tokens = await this.generateTokens(payload, rememberSession)
     await this.saveToken(admin._id, tokens.refreshToken, rememberSession)
     return { ...tokens, admin };
@@ -212,7 +210,7 @@ export class AuthService {
     }
 
     let personInfo: Admin | User
-    let person: {id: string, nickname: string, accessLvl?: number, banned?: boolean}
+    let person: { id: string, nickname: string, accessLvl?: number, banned?: boolean }
     if (personData.hasOwnProperty('accessLvl')) {
       personInfo = await this.adminsService.findAdminById(personData.id)
       person = {

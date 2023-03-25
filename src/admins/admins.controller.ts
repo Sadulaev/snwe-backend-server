@@ -19,8 +19,8 @@ export class AdminsController {
     private productsService: ProductsService,
   ) {}
 
-  @Access([0])
-  @UseGuards(AccessGuard)
+  // @Access([0])
+  // @UseGuards(AccessGuard)
   @Post('/create/:id')
   async createAdmin(@Param('id') id: string): Promise<Admin> {
     return this.adminsService.createAdmin(id);

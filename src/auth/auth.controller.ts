@@ -46,7 +46,7 @@ export class AuthController {
     @Headers('rememberSession') rememberHeader,
     @Res({ passthrough: true }) response: Response,
   ) {
-    console.log(rememberHeader)
+    // console.log(rememberHeader)
     const rememberSession = rememberHeader === 'true' ? true : false;
     const tokens = await this.authService.adminLogin(loginAdminDto, rememberSession)
     const tokenLifeTime = (rememberSession ? 21 : 1) * 24 * 60 * 60 * 1000;
@@ -64,7 +64,7 @@ export class AuthController {
   }
 
   @Post('/logout')
-  @Redirect(process.env.CLIENT_API, 301)
+  // @Redirect(process.env.CLIENT_API, 301)
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -75,7 +75,7 @@ export class AuthController {
     return token;
   }
 
-  @Get('/refresh')
+  @Post('/refresh')
   async refreshToken(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,

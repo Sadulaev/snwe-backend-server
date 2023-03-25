@@ -37,7 +37,7 @@ export class CartController {
     @UseGuards(JwtAuthGuard)
     @Post('/clear')
     async clearCart(@Req() req) {
-        console.log(req.user.id)
+        // console.log(req.user.id)
         return await this.cartService.clearCart(req.user.id)
     }
 }

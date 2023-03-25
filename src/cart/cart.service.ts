@@ -95,12 +95,11 @@ export class CartService {
   }
 
   async clearCart(userId: string) {
-    const result = await this.cartModel.updateOne({userId}, {nutritions: [], mixtures: []}).exec()
-    console.log(result)
-    if(result) {
-      throw new HttpException('Корзина успешно очищена', HttpStatus.OK)
-    } else {
-      throw new HttpException('Ошибка очистки корзины', HttpStatus.INTERNAL_SERVER_ERROR)
+    try {
+      return await this.cartModel.updateOne({userId}, {nutritions: [], mixtures: []}).exec()
+    } catch (e) {
+      console.log(e)
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 

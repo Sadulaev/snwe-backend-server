@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { OnGatewayInit, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from 'Socket.IO'
-import { ConnectedSocket, SubscribeMessage } from "@nestjs/websockets/decorators";
+import { SubscribeMessage } from "@nestjs/websockets/decorators";
 import { Order } from "./order.model";
 
 
@@ -18,14 +18,13 @@ export class OrderGateway implements OnGatewayInit {
 
     afterInit(server: Server) {
         this.logger.log('Initialized')
-        console.log(server)
     }
 
     async handleCreateOrder(order: Order) {
-        this.server.emit('admin:newOrder', {order})
+        this.server.emit('admin:new-order', {order})
     }
 
     async handleUpdateOrder(order: Order) {
-        this.server.emit('admin:updateOrder', {order})
+        this.server.emit('admin:update-order', {order})
     }
 }

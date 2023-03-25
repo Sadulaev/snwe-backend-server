@@ -37,6 +37,8 @@ export class CreateNutritionDto {
 }
 
 export class EditNutritionDto {
+  _id: string;
+  
   @IsNotEmpty({ message: 'Значение не может быть пустым' })
   image?: string;
 

@@ -8,8 +8,8 @@ import {
 } from 'class-validator';
 
 export class CreateMixtureDto {
-  @IsDefined({ message: 'Поле не может быть пустым' })
-  @IsNotEmpty({ message: 'Значение не может быть пустым' })
+  // @IsDefined({ message: 'Поле не может быть пустым' })
+  // @IsNotEmpty({ message: 'Значение не может быть пустым' })
   readonly image: string;
 
   @IsDefined({ message: 'Поле не может быть пустым' })

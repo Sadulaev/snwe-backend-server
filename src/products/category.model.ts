@@ -10,8 +10,8 @@ export class Category {
   @Prop({ required: true, unique: true })
   title: string;
 
-  @Prop({ required: true })
-  description: string;
+  @Prop({ required: false })
+  description?: string;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

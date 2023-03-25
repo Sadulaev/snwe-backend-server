@@ -5,6 +5,7 @@ import { CategorySchema } from './category.model';
 import { NutritionSchema } from './nutrition.model';
 import { MixtureSchema } from './mixture.model';
 import { MongooseModule } from '@nestjs/mongoose';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   providers: [ProductsService],
@@ -15,6 +16,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       { name: 'Nutrition', schema: NutritionSchema },
       { name: 'Mixture', schema: MixtureSchema },
     ]),
+    FilesModule
   ],
   exports: [ProductsService],
 })

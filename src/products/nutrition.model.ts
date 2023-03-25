@@ -20,8 +20,8 @@ export class Nutrition {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Category' })
-  category: Category;
+  @Prop()
+  category: string;
 
   @Prop({ default: [] })
   warnings: string[];

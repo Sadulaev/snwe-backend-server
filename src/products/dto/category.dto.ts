@@ -7,9 +7,7 @@ export class CreateCategoryDto {
   })
   readonly title: string;
 
-  @IsDefined({ message: 'Поле не может быть пустым' })
-  @IsNotEmpty({ message: 'Описание категории не может быть пустым' })
-  readonly description: string;
+  readonly description?: string;
 }
 
 export class EditCategoryDto {
