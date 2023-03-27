@@ -18,10 +18,6 @@ import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'static'),
-      exclude: ['/api/(.*)'],
-    }),
     ConfigModule.forRoot({
       envFilePath: `${process.env.NODE_ENV}.env`,
     }),

@@ -118,12 +118,10 @@ export class ProductsService {
   }
 
   async getMixtureById(id: string): Promise<Mixture> {
-    const responce = await this.mixtureModel.findById(id).exec();
-    console.log(responce)
-    if (!responce) {
-      throw new HttpException('Смесь не найдена', HttpStatus.NOT_FOUND);
-    } else {
-      return responce;
+    try {
+      return await this.mixtureModel.findById(id).exec();
+    } catch (e) {
+      throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
@@ -211,11 +209,10 @@ export class ProductsService {
     }
 
   async getNutritionById(id: string) {
-      const responce = await this.nutritionModel.findById(id).exec();
-      if (!responce) {
-        throw new HttpException('Питание не найдено', HttpStatus.NOT_FOUND);
-      } else {
-        return responce;
+      try {
+        return await this.nutritionModel.findById(id).exec();
+      } catch (e) {
+        throw new HttpException('Ошибка на стороне сервера', HttpStatus.INTERNAL_SERVER_ERROR)
       }
     }
 

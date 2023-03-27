@@ -93,7 +93,7 @@ export class ProductsController {
   //   return this.productsService.editNutrition(id, editNutritionDto);
   // }
 
-  @Get('/nutrition/getById/:id') 
+  @Get('/nutrition/:id') 
   async getNutritionById(@Param('id') id: string) {
     return this.productsService.getNutritionById(id);
   }
@@ -147,7 +147,7 @@ export class ProductsController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createMixtureDto
   ) {
-    return await this.productsService.createMixture({image: file?.filename || '', ...createMixtureDto, warnings: createMixtureDto.warnings.split(',')});
+    return await this.productsService.createMixture({image: file?.filename || '', ...createMixtureDto, warnings: createMixtureDto.warnings.split(','), info: createMixtureDto.info.split(',')});
   }
 
   @Post('/mixture/update/:id')
@@ -170,13 +170,13 @@ export class ProductsController {
     @Body() editMixtureDto
   ) {
     console.log(file)
-    return this.productsService.editMixture(id, {image: file?.filename || '', ...editMixtureDto, warnings: editMixtureDto.warnings.split(',')});
+    return this.productsService.editMixture(id, {image: file?.filename || '', ...editMixtureDto, warnings: editMixtureDto.warnings.split(','), info: editMixtureDto.info.split(',')});
   }
 
-  // @Get('/mixture/getById/:id')
-  // async getMixtureById(@Param('id') id: string) {
-  //   return this.productsService.getMixtureById(id);
-  // }
+  @Get('/mixture/:id')
+  async getMixtureById(@Param('id') id: string) {
+    return this.productsService.getMixtureById(id);
+  }
 
   @Get('/mixture/getArrayById')
   async getMixturesArrayById(@Body() mixtures: string[]) {
