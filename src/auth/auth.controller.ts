@@ -87,6 +87,8 @@ export class AuthController {
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
     return { accessToken: tokens.accesToken, info: tokens.personInfo };
   }
