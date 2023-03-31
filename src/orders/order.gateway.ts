@@ -1,6 +1,6 @@
 import { Logger } from "@nestjs/common";
 import { OnGatewayInit, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
-import { Server, Socket } from 'Socket.IO'
+import { Server, Socket } from 'socket.io'
 import { SubscribeMessage } from "@nestjs/websockets/decorators";
 import { Order } from "./order.model";
 

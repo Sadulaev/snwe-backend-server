@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common";
-import { Server, Socket } from 'Socket.IO'
+import { Server, Socket } from 'socket.io'
 import { WebSocketGateway, WebSocketServer, MessageBody, OnGatewayInit, SubscribeMessage, ConnectedSocket } from '@nestjs/websockets'
 
 import { ChatService } from "./chat.service";
