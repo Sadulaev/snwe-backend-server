@@ -36,6 +36,8 @@ export class AuthController {
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
     return { accessToken: tokens.accesToken, user: tokens.user };
   }
@@ -53,6 +55,8 @@ export class AuthController {
     response.cookie('refreshToken', tokens.refreshToken, {
       maxAge: tokenLifeTime,
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
     return {accessToken: tokens.accesToken, user: tokens.admin}
   }
